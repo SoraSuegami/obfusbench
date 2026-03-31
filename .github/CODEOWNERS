@@ -1,8 +1,8 @@
 # Default owner for everything
-* @REPLACE_WITH_GITHUB_USERNAME_OR_TEAM
+* @SoraSuegami
 
 # Benchmark data requires maintainer review
-benchmarks/** @REPLACE_WITH_GITHUB_USERNAME_OR_TEAM
+benchmarks/** @SoraSuegami
 
 # Workflow changes require maintainer review
-.github/workflows/** @REPLACE_WITH_GITHUB_USERNAME_OR_TEAM
+.github/workflows/** @SoraSuegami
