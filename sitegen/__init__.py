@@ -1,0 +1,1 @@
+"""ObfusBench static site generator."""

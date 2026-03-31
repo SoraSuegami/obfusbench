@@ -1,0 +1,82 @@
+{
+  "additionalProperties": false,
+  "description": "A single iO implementation benchmark entry.",
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "authors": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      ],
+      "title": "Authors"
+    },
+    "url": {
+      "default": null,
+      "title": "Url",
+      "type": "string"
+    },
+    "commit": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Commit"
+    },
+    "obfuscation_latency_sec": {
+      "title": "Obfuscation Latency Sec",
+      "type": "number"
+    },
+    "obfuscation_cost_usd": {
+      "title": "Obfuscation Cost Usd",
+      "type": "number"
+    },
+    "obfuscation_peak_memory_gb": {
+      "title": "Obfuscation Peak Memory Gb",
+      "type": "number"
+    },
+    "obfuscated_circuit_size_gb": {
+      "title": "Obfuscated Circuit Size Gb",
+      "type": "number"
+    },
+    "evaluation_latency_sec": {
+      "title": "Evaluation Latency Sec",
+      "type": "number"
+    },
+    "evaluation_cost_usd": {
+      "title": "Evaluation Cost Usd",
+      "type": "number"
+    },
+    "evaluation_peak_memory_gb": {
+      "title": "Evaluation Peak Memory Gb",
+      "type": "number"
+    }
+  },
+  "required": [
+    "id",
+    "authors",
+    "obfuscation_latency_sec",
+    "obfuscation_cost_usd",
+    "obfuscation_peak_memory_gb",
+    "obfuscated_circuit_size_gb",
+    "evaluation_latency_sec",
+    "evaluation_cost_usd",
+    "evaluation_peak_memory_gb"
+  ],
+  "title": "Benchmark",
+  "type": "object"
+}

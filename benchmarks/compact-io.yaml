@@ -1,0 +1,14 @@
+id: "Compact-iO"
+authors:
+  - Priya Sharma
+  - David Kim
+  - Luca Rossi
+url: "https://github.com/compact-io/reference-impl"
+commit: "b38d0e5"
+obfuscation_latency_sec: 1560.2
+obfuscation_cost_usd: 98.50
+obfuscation_peak_memory_gb: 64.0
+obfuscated_circuit_size_gb: 384.0
+evaluation_latency_sec: 0.93
+evaluation_cost_usd: 0.07
+evaluation_peak_memory_gb: 4.2

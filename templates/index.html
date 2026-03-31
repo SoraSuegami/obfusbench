@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}{{ site.site_name }} &mdash; Leaderboard{% endblock %}
+
+{% block content %}
+<section class="leaderboard">
+    <h2>{{ site.benchmark_name }}</h2>
+    <p class="impl-count">{{ benchmarks | length }} implementation{{ "s" if benchmarks | length != 1 else "" }} submitted</p>
+
+    {% if benchmarks %}
+    <div class="table-wrap">
+        <table id="leaderboard" aria-label="Benchmark leaderboard">
+            <thead>
+                <tr>
+                    <th data-sort="id" aria-sort="none">Implementation</th>
+                    <th data-sort="authors" aria-sort="none">Authors</th>
+                    {% for m in metric_fields %}
+                    <th data-sort="{{ m.key }}" aria-sort="none" class="numeric">
+                        {{ m.label }}
+                        <span class="unit">({{ m.unit }})</span>
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for bm in benchmarks %}
+                <tr>
+                    <td><a href="{{ base_url }}implementations/{{ bm.slug }}/">{{ bm.id }}</a></td>
+                    <td>{{ bm.authors | join(", ") }}</td>
+                    {% for m in metric_fields %}
+                    <td class="numeric" data-value="{{ bm[m.key] }}">{{ bm[m.key] | format_number }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>No benchmark entries yet.</p>
+        <p>Be the first to submit! See the <a href="{{ site.repository_url }}">contributing guide</a> for instructions.</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ base_url }}static/app.js"></script>
+{% endblock %}

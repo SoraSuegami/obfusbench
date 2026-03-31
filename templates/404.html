@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Page not found &mdash; {{ site.site_name }}{% endblock %}
+
+{% block content %}
+<section class="error-page">
+    <h2>404 &mdash; Page not found</h2>
+    <p>The page you are looking for does not exist.</p>
+    <p><a href="{{ base_url }}">&larr; Back to leaderboard</a></p>
+</section>
+{% endblock %}

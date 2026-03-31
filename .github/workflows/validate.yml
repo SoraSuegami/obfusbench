@@ -1,0 +1,44 @@
+name: Validate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "benchmarks/**"
+      - "examples/**"
+      - "schema/**"
+      - "config/**"
+      - "sitegen/**"
+      - "templates/**"
+      - "static/**"
+      - "tests/**"
+      - "pyproject.toml"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - ".github/workflows/**"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -e ".[test]"
+
+      - name: Validate benchmarks
+        run: python -m sitegen validate
+
+      - name: Build site
+        run: python -m sitegen build --output site
+
+      - name: Run tests
+        run: pytest -v

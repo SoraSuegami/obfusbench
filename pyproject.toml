@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "obfusbench"
+version = "0.1.0"
+description = "Public benchmark leaderboard for iO implementations"
+requires-python = ">=3.12"
+dependencies = [
+    "Jinja2>=3.1",
+    "PyYAML>=6.0",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["sitegen*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,13 @@
+id: "Example iO Implementation"
+authors:
+  - Alice Example
+  - Bob Example
+url: "https://github.com/example/io-impl"
+commit: "abc1234"
+obfuscation_latency_sec: 123.45
+obfuscation_cost_usd: 67.89
+obfuscation_peak_memory_gb: 48.0
+obfuscated_circuit_size_gb: 512.0
+evaluation_latency_sec: 0.42
+evaluation_cost_usd: 0.03
+evaluation_peak_memory_gb: 2.5

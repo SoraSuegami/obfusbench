@@ -1,0 +1,5 @@
+site_name: "ObfusBench"
+site_tagline: "Public benchmark leaderboard for iO implementations"
+site_description: "A public leaderboard for benchmarking iO implementations on a standard benchmark circuit."
+repository_url: "https://github.com/SoraSuegami/obfusbench"
+benchmark_name: "Standard benchmark circuit"

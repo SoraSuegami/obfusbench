@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}{{ benchmark.id }} &mdash; {{ site.site_name }}{% endblock %}
+
+{% block content %}
+<article class="detail">
+    <p class="back-link"><a href="{{ base_url }}">&larr; Back to leaderboard</a></p>
+
+    <h2>{{ benchmark.id }}</h2>
+
+    <section class="metadata">
+        <dl>
+            <dt>Authors</dt>
+            <dd>{{ benchmark.authors | join(", ") }}</dd>
+            {% if benchmark.url %}
+            <dt>URL</dt>
+            <dd><a href="{{ benchmark.url }}" rel="noopener noreferrer">{{ benchmark.url }}</a></dd>
+            {% endif %}
+            {% if benchmark.commit %}
+            <dt>Commit</dt>
+            <dd>
+                {% if commit_link %}
+                <a href="{{ commit_link }}" rel="noopener noreferrer"><code>{{ benchmark.commit }}</code></a>
+                {% else %}
+                <code>{{ benchmark.commit }}</code>
+                {% endif %}
+            </dd>
+            {% endif %}
+        </dl>
+    </section>
+
+    <section class="metrics-section">
+        <h3>Obfuscation</h3>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <span class="metric-label">Latency</span>
+                <span class="metric-value">{{ benchmark.obfuscation_latency_sec | format_number }} <span class="unit">sec</span></span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Cost</span>
+                <span class="metric-value">{{ benchmark.obfuscation_cost_usd | format_number }} <span class="unit">USD</span></span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Peak memory</span>
+                <span class="metric-value">{{ benchmark.obfuscation_peak_memory_gb | format_number }} <span class="unit">GB</span></span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Circuit size</span>
+                <span class="metric-value">{{ benchmark.obfuscated_circuit_size_gb | format_number }} <span class="unit">GB</span></span>
+            </div>
+        </div>
+    </section>
+
+    <section class="metrics-section">
+        <h3>Evaluation</h3>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <span class="metric-label">Latency</span>
+                <span class="metric-value">{{ benchmark.evaluation_latency_sec | format_number }} <span class="unit">sec</span></span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Cost</span>
+                <span class="metric-value">{{ benchmark.evaluation_cost_usd | format_number }} <span class="unit">USD</span></span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Peak memory</span>
+                <span class="metric-value">{{ benchmark.evaluation_peak_memory_gb | format_number }} <span class="unit">GB</span></span>
+            </div>
+        </div>
+    </section>
+</article>
+{% endblock %}
