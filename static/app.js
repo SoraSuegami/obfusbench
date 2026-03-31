@@ -14,7 +14,7 @@
         "obfuscation_latency_sec",
         "obfuscation_cost_usd",
         "obfuscation_peak_memory_gb",
-        "obfuscated_circuit_size_gb",
+        "storage_gb",
         "evaluation_latency_sec",
         "evaluation_cost_usd",
         "evaluation_peak_memory_gb",

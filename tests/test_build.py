@@ -18,7 +18,7 @@ VALID_DATA = {
     "obfuscation_latency_sec": 100.0,
     "obfuscation_cost_usd": 50.0,
     "obfuscation_peak_memory_gb": 32.0,
-    "obfuscated_circuit_size_gb": 256.0,
+    "storage_gb": 256.0,
     "evaluation_latency_sec": 0.5,
     "evaluation_cost_usd": 0.01,
     "evaluation_peak_memory_gb": 2.0,

@@ -7,7 +7,7 @@ commit: "e4a91bf"
 obfuscation_latency_sec: 3842.7
 obfuscation_cost_usd: 215.40
 obfuscation_peak_memory_gb: 128.0
-obfuscated_circuit_size_gb: 1024.0
+storage_gb: 1024.0
 evaluation_latency_sec: 1.87
 evaluation_cost_usd: 0.12
 evaluation_peak_memory_gb: 8.5

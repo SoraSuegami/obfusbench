@@ -38,7 +38,7 @@ class Benchmark(BaseModel):
     obfuscation_latency_sec: float
     obfuscation_cost_usd: float
     obfuscation_peak_memory_gb: float
-    obfuscated_circuit_size_gb: float
+    storage_gb: float
     evaluation_latency_sec: float
     evaluation_cost_usd: float
     evaluation_peak_memory_gb: float
@@ -86,7 +86,7 @@ class Benchmark(BaseModel):
         "obfuscation_latency_sec",
         "obfuscation_cost_usd",
         "obfuscation_peak_memory_gb",
-        "obfuscated_circuit_size_gb",
+        "storage_gb",
         "evaluation_latency_sec",
         "evaluation_cost_usd",
         "evaluation_peak_memory_gb",
@@ -106,7 +106,7 @@ METRIC_FIELDS: list[dict[str, str]] = [
     {"key": "obfuscation_latency_sec", "label": "Obf. latency", "unit": "sec"},
     {"key": "obfuscation_cost_usd", "label": "Obf. cost", "unit": "$"},
     {"key": "obfuscation_peak_memory_gb", "label": "Obf. peak mem", "unit": "GB"},
-    {"key": "obfuscated_circuit_size_gb", "label": "Circuit size", "unit": "GB"},
+    {"key": "storage_gb", "label": "Storage", "unit": "GB"},
     {"key": "evaluation_latency_sec", "label": "Eval. latency", "unit": "sec"},
     {"key": "evaluation_cost_usd", "label": "Eval. cost", "unit": "$"},
     {"key": "evaluation_peak_memory_gb", "label": "Eval. peak mem", "unit": "GB"},

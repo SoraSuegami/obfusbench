@@ -33,7 +33,7 @@ Thank you for contributing a benchmark entry! This guide explains how to submit 
 | `obfuscation_latency_sec` | float >= 0 | **yes** | Obfuscation time in seconds |
 | `obfuscation_cost_usd` | float >= 0 | **yes** | Obfuscation cost in USD |
 | `obfuscation_peak_memory_gb` | float >= 0 | **yes** | Obfuscation peak memory in GB |
-| `obfuscated_circuit_size_gb` | float >= 0 | **yes** | Obfuscated circuit size in GB |
+| `storage_gb` | float >= 0 | **yes** | Storage size in GB |
 | `evaluation_latency_sec` | float >= 0 | **yes** | Evaluation time in seconds |
 | `evaluation_cost_usd` | float >= 0 | **yes** | Evaluation cost in USD |
 | `evaluation_peak_memory_gb` | float >= 0 | **yes** | Evaluation peak memory in GB |

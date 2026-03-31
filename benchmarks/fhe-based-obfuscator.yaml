@@ -5,7 +5,7 @@ commit: "7f2c3d1a"
 obfuscation_latency_sec: 7210.3
 obfuscation_cost_usd: 489.00
 obfuscation_peak_memory_gb: 256.0
-obfuscated_circuit_size_gb: 2048.0
+storage_gb: 2048.0
 evaluation_latency_sec: 3.45
 evaluation_cost_usd: 0.25
 evaluation_peak_memory_gb: 16.0
