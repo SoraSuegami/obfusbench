@@ -1,9 +1,81 @@
-// ObfusBench — client-side table sorting
+// ObfusBench — spotlight + client-side table sorting
 (function () {
     "use strict";
 
     var table = document.getElementById("leaderboard");
     if (!table) return;
+
+    // --- Spotlight: find best eval latency ---
+    (function buildSpotlight() {
+        var spotlight = document.getElementById("spotlight");
+        if (!spotlight) return;
+
+        var ths = table.querySelectorAll("thead th[data-sort]");
+        var metricLabels = {};
+        var metricUnits = {};
+        var evalColIndex = -1;
+        ths.forEach(function (th, i) {
+            var key = th.getAttribute("data-sort");
+            if (key === "evaluation_latency_sec") evalColIndex = i;
+            var label = th.textContent.trim().replace(/\s*\(.*\)\s*$/, "");
+            var unitMatch = th.textContent.match(/\(([^)]+)\)/);
+            metricLabels[i] = label;
+            metricUnits[i] = unitMatch ? unitMatch[1] : "";
+        });
+        if (evalColIndex < 0) return;
+
+        var rows = table.querySelectorAll("tbody tr");
+        if (rows.length === 0) return;
+
+        var bestRow = null;
+        var bestVal = Infinity;
+        rows.forEach(function (row) {
+            var cell = row.cells[evalColIndex];
+            var v = parseFloat(cell.getAttribute("data-value"));
+            if (v < bestVal) {
+                bestVal = v;
+                bestRow = row;
+            }
+        });
+        if (!bestRow) return;
+
+        // Populate hero
+        document.getElementById("spotlight-value").textContent = formatNum(bestVal);
+        var nameLink = bestRow.cells[0].querySelector("a");
+        var spotName = document.getElementById("spotlight-name");
+        spotName.textContent = nameLink.textContent;
+        spotName.href = nameLink.href;
+
+        // Populate details table with all metrics except eval latency
+        var tbody = document.querySelector("#spotlight-table tbody");
+        ths.forEach(function (th, i) {
+            var key = th.getAttribute("data-sort");
+            if (key === "id" || key === "authors" || key === "evaluation_latency_sec") return;
+            var cell = bestRow.cells[i];
+            if (!cell || !cell.hasAttribute("data-value")) return;
+
+            var tr = document.createElement("tr");
+            var tdLabel = document.createElement("td");
+            tdLabel.textContent = metricLabels[i];
+            var tdVal = document.createElement("td");
+            tdVal.textContent = cell.textContent.trim() + (metricUnits[i] ? " " + metricUnits[i] : "");
+            tr.appendChild(tdLabel);
+            tr.appendChild(tdVal);
+            tbody.appendChild(tr);
+        });
+
+        spotlight.removeAttribute("hidden");
+    })();
+
+    function formatNum(v) {
+        if (v === 0) return "0";
+        var abs = Math.abs(v);
+        if (abs >= 1e6 || abs < 0.001) return v.toExponential(2);
+        if (v === Math.floor(v)) return String(Math.floor(v));
+        return parseFloat(v.toFixed(4)).toString();
+    }
+
+    // --- Table sorting ---
 
     var thead = table.querySelector("thead");
     var tbody = table.querySelector("tbody");

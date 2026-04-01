@@ -8,6 +8,22 @@
     <p class="impl-count">{{ benchmarks | length }} implementation{{ "s" if benchmarks | length != 1 else "" }} submitted</p>
 
     {% if benchmarks %}
+    <section id="spotlight" class="spotlight" hidden>
+        <div class="spotlight-inner">
+            <div class="spotlight-hero">
+                <span class="spotlight-label">Best Eval. Latency</span>
+                <span class="spotlight-value" id="spotlight-value"></span>
+                <span class="spotlight-unit">sec</span>
+                <a class="spotlight-name" id="spotlight-name" href="#"></a>
+            </div>
+            <div class="spotlight-details">
+                <table class="spotlight-table" id="spotlight-table">
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
     <div class="table-wrap">
         <table id="leaderboard" aria-label="Benchmark leaderboard">
             <thead>

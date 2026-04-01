@@ -162,6 +162,111 @@ tbody tr:hover {
     background: var(--color-row-hover);
 }
 
+/* Spotlight */
+.spotlight {
+    margin-bottom: 2rem;
+    border: 2px solid var(--color-accent);
+    border-radius: 8px;
+    background: linear-gradient(135deg, #eff6ff, #f8fafc);
+    overflow: hidden;
+}
+
+.spotlight-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 0;
+}
+
+.spotlight-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+    text-align: center;
+}
+
+.spotlight-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-accent);
+    margin-bottom: 0.25rem;
+}
+
+.spotlight-value {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--color-fg);
+    font-variant-numeric: tabular-nums;
+}
+
+.spotlight-unit {
+    font-size: 1rem;
+    color: var(--color-muted);
+    margin-bottom: 0.5rem;
+}
+
+.spotlight-name {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.spotlight-details {
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    border-left: 1px solid var(--color-border);
+}
+
+.spotlight-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    white-space: normal;
+}
+
+.spotlight-table td {
+    padding: 0.3rem 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.spotlight-table td:first-child {
+    color: var(--color-muted);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.spotlight-table td:last-child {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.spotlight-table tr:last-child td {
+    border-bottom: none;
+}
+
+@media (max-width: 600px) {
+    .spotlight-inner {
+        grid-template-columns: 1fr;
+    }
+
+    .spotlight-details {
+        border-left: none;
+        border-top: 1px solid var(--color-border);
+    }
+
+    .spotlight-hero {
+        padding: 1.5rem 1rem;
+    }
+
+    .spotlight-value {
+        font-size: 2.2rem;
+    }
+}
+
 /* Empty state */
 .empty-state {
     text-align: center;
