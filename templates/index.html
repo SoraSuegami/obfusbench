@@ -44,7 +44,7 @@
                     <td><a href="{{ base_url }}implementations/{{ bm.slug }}/">{{ bm.id }}</a></td>
                     <td>{{ bm.authors | join(", ") }}</td>
                     {% for m in metric_fields %}
-                    <td class="numeric" data-value="{{ bm[m.key] }}">{{ bm[m.key] | format_number }}</td>
+                    <td class="numeric" data-value="{% if bm[m.key] is not none %}{{ bm[m.key] }}{% endif %}">{{ bm[m.key] | format_number }}</td>
                     {% endfor %}
                 </tr>
                 {% endfor %}

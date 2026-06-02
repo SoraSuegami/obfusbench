@@ -58,6 +58,21 @@ def test_reject_nan_metric():
         Benchmark(**data)
 
 
+def test_optional_peak_memory_metrics():
+    data = {**VALID_DATA}
+    del data["obfuscation_peak_memory_gb"]
+    del data["evaluation_peak_memory_gb"]
+    bm = Benchmark(**data)
+    assert bm.obfuscation_peak_memory_gb is None
+    assert bm.evaluation_peak_memory_gb is None
+
+
+def test_reject_negative_optional_peak_memory_metric():
+    data = {**VALID_DATA, "obfuscation_peak_memory_gb": -1.0}
+    with pytest.raises(ValidationError, match="non-negative"):
+        Benchmark(**data)
+
+
 def test_reject_unknown_fields():
     data = {**VALID_DATA, "unknown_field": "surprise"}
     with pytest.raises(ValidationError, match="extra"):

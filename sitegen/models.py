@@ -25,6 +25,12 @@ def _check_finite_nonneg(v: float, field_name: str) -> float:
     return v
 
 
+def _check_optional_finite_nonneg(v: float | None, field_name: str) -> float | None:
+    if v is None:
+        return None
+    return _check_finite_nonneg(v, field_name)
+
+
 class Benchmark(BaseModel):
     """A single iO implementation benchmark entry."""
 
@@ -37,11 +43,11 @@ class Benchmark(BaseModel):
 
     obfuscation_latency_sec: float
     obfuscation_cost_usd: float
-    obfuscation_peak_memory_gb: float
+    obfuscation_peak_memory_gb: float | None = None
     storage_gb: float
     evaluation_latency_sec: float
     evaluation_cost_usd: float
-    evaluation_peak_memory_gb: float
+    evaluation_peak_memory_gb: float | None = None
 
     # Set after validation
     slug: str = ""
@@ -85,15 +91,21 @@ class Benchmark(BaseModel):
     @field_validator(
         "obfuscation_latency_sec",
         "obfuscation_cost_usd",
-        "obfuscation_peak_memory_gb",
         "storage_gb",
         "evaluation_latency_sec",
         "evaluation_cost_usd",
-        "evaluation_peak_memory_gb",
     )
     @classmethod
     def check_metric(cls, v: float, info) -> float:
         return _check_finite_nonneg(v, info.field_name)
+
+    @field_validator(
+        "obfuscation_peak_memory_gb",
+        "evaluation_peak_memory_gb",
+    )
+    @classmethod
+    def check_optional_metric(cls, v: float | None, info) -> float | None:
+        return _check_optional_finite_nonneg(v, info.field_name)
 
     @model_validator(mode="after")
     def set_slug(self) -> "Benchmark":

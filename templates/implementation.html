@@ -42,7 +42,7 @@
             </div>
             <div class="metric-card">
                 <span class="metric-label">Peak memory</span>
-                <span class="metric-value">{{ benchmark.obfuscation_peak_memory_gb | format_number }} <span class="unit">GB</span></span>
+                <span class="metric-value">{{ benchmark.obfuscation_peak_memory_gb | format_number }}{% if benchmark.obfuscation_peak_memory_gb is not none %} <span class="unit">GB</span>{% endif %}</span>
             </div>
             <div class="metric-card">
                 <span class="metric-label">Storage</span>
@@ -64,7 +64,7 @@
             </div>
             <div class="metric-card">
                 <span class="metric-label">Peak memory</span>
-                <span class="metric-value">{{ benchmark.evaluation_peak_memory_gb | format_number }} <span class="unit">GB</span></span>
+                <span class="metric-value">{{ benchmark.evaluation_peak_memory_gb | format_number }}{% if benchmark.evaluation_peak_memory_gb is not none %} <span class="unit">GB</span>{% endif %}</span>
             </div>
         </div>
     </section>

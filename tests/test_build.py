@@ -84,6 +84,35 @@ def test_build_with_one_benchmark(tmp_path):
     assert (output_dir / "static" / "app.js").exists()
 
 
+def test_build_missing_peak_memory_displays_nd(tmp_path):
+    """Missing peak memory fields render as ND and are exported as null."""
+    benchmarks_dir = tmp_path / "benchmarks"
+    benchmarks_dir.mkdir()
+    output_dir = tmp_path / "site"
+
+    data = {**VALID_DATA}
+    del data["obfuscation_peak_memory_gb"]
+    del data["evaluation_peak_memory_gb"]
+    (benchmarks_dir / "test.yaml").write_text(yaml.dump(data))
+
+    benchmarks = load_benchmarks(benchmarks_dir)
+    build_site(benchmarks, output_dir, PROJECT_ROOT)
+
+    index_html = (output_dir / "index.html").read_text()
+    assert ">ND</td>" in index_html
+    assert ">ND GB<" not in index_html
+
+    detail_html = (
+        output_dir / "implementations" / "test-implementation" / "index.html"
+    ).read_text()
+    assert ">ND</span>" in detail_html
+    assert "ND <span class=\"unit\">GB</span>" not in detail_html
+
+    bj = json.loads((output_dir / "benchmarks.json").read_text())
+    assert bj[0]["obfuscation_peak_memory_gb"] is None
+    assert bj[0]["evaluation_peak_memory_gb"] is None
+
+
 def test_benchmarks_json_no_slug(tmp_path):
     """benchmarks.json should not include the internal slug field."""
     benchmarks_dir = tmp_path / "benchmarks"

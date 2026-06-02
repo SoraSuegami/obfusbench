@@ -5,8 +5,10 @@ from __future__ import annotations
 import re
 
 
-def format_number(value: float) -> str:
-    """Format a number for display: trimmed fixed-point or scientific notation."""
+def format_number(value: float | None) -> str:
+    """Format a number for display, using ND for unavailable values."""
+    if value is None:
+        return "ND"
     if value == 0:
         return "0"
     abs_val = abs(value)

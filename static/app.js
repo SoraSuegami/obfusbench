@@ -58,7 +58,9 @@
             var tdLabel = document.createElement("td");
             tdLabel.textContent = metricLabels[i];
             var tdVal = document.createElement("td");
-            tdVal.textContent = cell.textContent.trim() + (metricUnits[i] ? " " + metricUnits[i] : "");
+            var rawValue = cell.getAttribute("data-value");
+            var isMissing = rawValue === null || rawValue === "";
+            tdVal.textContent = cell.textContent.trim() + (!isMissing && metricUnits[i] ? " " + metricUnits[i] : "");
             tr.appendChild(tdLabel);
             tr.appendChild(tdVal);
             tbody.appendChild(tr);
@@ -115,6 +117,9 @@
             if (isNumeric) {
                 valA = parseFloat(cellA.getAttribute("data-value"));
                 valB = parseFloat(cellB.getAttribute("data-value"));
+                if (Number.isNaN(valA) && Number.isNaN(valB)) return 0;
+                if (Number.isNaN(valA)) return 1;
+                if (Number.isNaN(valB)) return -1;
             } else {
                 valA = cellA.textContent.trim().toLowerCase();
                 valB = cellB.textContent.trim().toLowerCase();

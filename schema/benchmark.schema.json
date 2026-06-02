@@ -46,8 +46,16 @@
       "type": "number"
     },
     "obfuscation_peak_memory_gb": {
-      "title": "Obfuscation Peak Memory Gb",
-      "type": "number"
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Obfuscation Peak Memory Gb"
     },
     "storage_gb": {
       "title": "Storage Gb",
@@ -62,8 +70,16 @@
       "type": "number"
     },
     "evaluation_peak_memory_gb": {
-      "title": "Evaluation Peak Memory Gb",
-      "type": "number"
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Evaluation Peak Memory Gb"
     }
   },
   "required": [
@@ -71,11 +87,9 @@
     "authors",
     "obfuscation_latency_sec",
     "obfuscation_cost_usd",
-    "obfuscation_peak_memory_gb",
     "storage_gb",
     "evaluation_latency_sec",
-    "evaluation_cost_usd",
-    "evaluation_peak_memory_gb"
+    "evaluation_cost_usd"
   ],
   "title": "Benchmark",
   "type": "object"

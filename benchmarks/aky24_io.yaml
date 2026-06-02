@@ -1,0 +1,11 @@
+id: "Diamond iO 1"
+authors: "Sora Suegami, Enrico Bottazzi, and Gayeong Park"
+url: "https://github.com/MachinaIO/mxx"
+commit: "c7c4fea"
+obfuscation_latency_sec: 38134.547105448204
+obfuscation_cost_usd: 5.92950e46
+# obfuscation_peak_memory_gb: 43.245830144
+storage_gb: 8.88953e46
+evaluation_latency_sec: 12132.192340411006
+evaluation_cost_usd: 9.51256e38
+# evaluation_peak_memory_gb: 43.245830144
