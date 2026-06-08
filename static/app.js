@@ -86,10 +86,12 @@
     // Numeric sort keys
     var numericKeys = new Set([
         "obfuscation_latency_sec",
+        "obfuscation_total_time_hours",
         "obfuscation_cost_usd",
         "obfuscation_peak_memory_gb",
         "storage_gb",
         "evaluation_latency_sec",
+        "evaluation_total_time_hours",
         "evaluation_cost_usd",
         "evaluation_peak_memory_gb",
     ]);

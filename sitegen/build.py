@@ -101,8 +101,23 @@ def build_site(benchmarks: list[Benchmark], output_dir: Path, project_root: Path
     }
 
     # Build index page
+    chart_data = [
+        {
+            "id": bm.id,
+            "slug": bm.slug,
+            "date": bm.date.isoformat(),
+            "obfuscation_latency_sec": bm.obfuscation_latency_sec,
+            "obfuscation_total_time_hours": bm.obfuscation_total_time_hours,
+            "evaluation_latency_sec": bm.evaluation_latency_sec,
+            "evaluation_total_time_hours": bm.evaluation_total_time_hours,
+            "storage_gb": bm.storage_gb,
+        }
+        for bm in benchmarks
+    ]
     index_tpl = env.get_template("index.html")
-    index_html = index_tpl.render(benchmarks=benchmarks, **common_ctx)
+    index_html = index_tpl.render(
+        benchmarks=benchmarks, chart_data=chart_data, **common_ctx
+    )
     (output_dir / "index.html").write_text(index_html)
 
     # Build detail pages
@@ -130,7 +145,7 @@ def build_site(benchmarks: list[Benchmark], output_dir: Path, project_root: Path
     # Generate benchmarks.json
     data = []
     for bm in benchmarks:
-        entry = bm.model_dump()
+        entry = bm.model_dump(mode="json")
         entry.pop("slug", None)
         data.append(entry)
     (output_dir / "benchmarks.json").write_text(

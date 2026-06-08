@@ -358,6 +358,52 @@ tbody tr:hover {
     color: var(--color-muted);
 }
 
+/* Charts */
+.charts {
+    margin: 1.5rem 0 2.5rem;
+}
+
+.charts h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+}
+
+.chart-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.chart-tab {
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-bg);
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.chart-tab:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.chart-tab.is-active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #ffffff;
+}
+
+.chart-canvas-wrap {
+    position: relative;
+    height: 380px;
+    width: 100%;
+}
+
 /* 404 */
 .error-page {
     text-align: center;

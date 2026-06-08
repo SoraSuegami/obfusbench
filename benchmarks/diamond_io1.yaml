@@ -3,10 +3,13 @@ authors: "Sora Suegami, Enrico Bottazzi, and Gayeong Park"
 developers: "Sora Suegami, Enrico Bottazzi, and Gayeong Park"
 url: "https://github.com/MachinaIO/mxx"
 commit: "c7c4fea"
+date: "2026-05-21"
 obfuscation_latency_sec: 7222.8969880742015
+obfuscation_total_time_hours: 3.295816263033e45
 obfuscation_cost_usd: 1.44686e46
 # obfuscation_peak_memory_gb: 56.554553344
 storage_gb: 2.04158e46
 evaluation_latency_sec: 2374.9142629847993
+evaluation_total_time_hours: 2.684437322317e35
 evaluation_cost_usd: 1.17847e36
 # evaluation_peak_memory_gb: 56.554553344

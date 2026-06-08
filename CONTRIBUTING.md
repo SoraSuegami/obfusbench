@@ -31,11 +31,14 @@ Thank you for contributing a benchmark entry! This guide explains how to submit 
 | `developers` | string or list of strings | **yes** | Developer name(s) for the implementation |
 | `url` | string (http/https URL) | no | Link to source code or paper |
 | `commit` | string | no | Commit hash or version identifier |
+| `date` | string (`YYYY-MM-DD`) | **yes** | Date the benchmark was measured; used as the x-axis on trend charts |
 | `obfuscation_latency_sec` | float >= 0 | **yes** | Obfuscation time in seconds |
+| `obfuscation_total_time_hours` | float >= 0 | **yes** | Total obfuscation wall-clock time in hours |
 | `obfuscation_cost_usd` | float >= 0 | **yes** | Obfuscation cost in USD |
 | `obfuscation_peak_memory_gb` | float >= 0 | no | Obfuscation peak memory in GB; displayed as ND when omitted |
-| `storage_gb` | float >= 0 | **yes** | Storage size in GB |
+| `storage_gb` | float >= 0 | **yes** | Storage size (obfuscated circuit size) in GB |
 | `evaluation_latency_sec` | float >= 0 | **yes** | Evaluation time in seconds |
+| `evaluation_total_time_hours` | float >= 0 | **yes** | Total evaluation wall-clock time in hours |
 | `evaluation_cost_usd` | float >= 0 | **yes** | Evaluation cost in USD |
 | `evaluation_peak_memory_gb` | float >= 0 | no | Evaluation peak memory in GB; displayed as ND when omitted |
 

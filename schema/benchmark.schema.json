@@ -72,8 +72,18 @@
       "default": null,
       "title": "Commit"
     },
+    "date": {
+      "format": "date",
+      "title": "Date",
+      "type": "string"
+    },
     "obfuscation_latency_sec": {
       "title": "Obfuscation Latency Sec",
+      "type": "number",
+      "minimum": 0
+    },
+    "obfuscation_total_time_hours": {
+      "title": "Obfuscation Total Time Hours",
       "type": "number",
       "minimum": 0
     },
@@ -105,6 +115,11 @@
       "type": "number",
       "minimum": 0
     },
+    "evaluation_total_time_hours": {
+      "title": "Evaluation Total Time Hours",
+      "type": "number",
+      "minimum": 0
+    },
     "evaluation_cost_usd": {
       "title": "Evaluation Cost Usd",
       "type": "number",
@@ -128,10 +143,13 @@
     "id",
     "authors",
     "developers",
+    "date",
     "obfuscation_latency_sec",
+    "obfuscation_total_time_hours",
     "obfuscation_cost_usd",
     "storage_gb",
     "evaluation_latency_sec",
+    "evaluation_total_time_hours",
     "evaluation_cost_usd"
   ],
   "title": "Benchmark",

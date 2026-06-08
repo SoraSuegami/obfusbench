@@ -8,6 +8,21 @@
     <p class="impl-count">{{ benchmarks | length }} implementation{{ "s" if benchmarks | length != 1 else "" }} submitted</p>
 
     {% if benchmarks %}
+    <section class="charts" id="charts">
+        <h3>Trends</h3>
+        <div class="chart-tabs" role="tablist" aria-label="Chart selection">
+            <button type="button" class="chart-tab is-active" role="tab" data-chart="0">Eval. total time vs date</button>
+            <button type="button" class="chart-tab" role="tab" data-chart="1">Obf. total time vs date</button>
+            <button type="button" class="chart-tab" role="tab" data-chart="2">Eval. total time vs circuit size</button>
+            <button type="button" class="chart-tab" role="tab" data-chart="3">Eval. latency vs date</button>
+            <button type="button" class="chart-tab" role="tab" data-chart="4">Obf. latency vs date</button>
+        </div>
+        <div class="chart-canvas-wrap">
+            <canvas id="chart-canvas" aria-label="Benchmark trend chart" role="img"></canvas>
+        </div>
+    </section>
+    <script id="benchmark-data" type="application/json">{{ chart_data | tojson }}</script>
+
     <section id="spotlight" class="spotlight" hidden>
         <div class="spotlight-inner">
             <div class="spotlight-hero">
@@ -64,4 +79,8 @@
 
 {% block scripts %}
 <script src="{{ base_url }}static/app.js"></script>
+{% if benchmarks %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{{ base_url }}static/charts.js"></script>
+{% endif %}
 {% endblock %}

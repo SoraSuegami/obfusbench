@@ -14,6 +14,8 @@
             <dd>{{ benchmark.authors | join(", ") }}</dd>
             <dt>Developers</dt>
             <dd>{{ benchmark.developers | join(", ") }}</dd>
+            <dt>Date</dt>
+            <dd>{{ benchmark.date.isoformat() }}</dd>
             {% if benchmark.url %}
             <dt>URL</dt>
             <dd><a href="{{ benchmark.url }}" rel="noopener noreferrer">{{ benchmark.url }}</a></dd>
@@ -39,6 +41,10 @@
                 <span class="metric-value">{{ benchmark.obfuscation_latency_sec | format_number }} <span class="unit">sec</span></span>
             </div>
             <div class="metric-card">
+                <span class="metric-label">Total time</span>
+                <span class="metric-value">{{ benchmark.obfuscation_total_time_hours | format_number }} <span class="unit">h</span></span>
+            </div>
+            <div class="metric-card">
                 <span class="metric-label">Cost</span>
                 <span class="metric-value">{{ benchmark.obfuscation_cost_usd | format_number }} <span class="unit">USD</span></span>
             </div>
@@ -59,6 +65,10 @@
             <div class="metric-card">
                 <span class="metric-label">Latency</span>
                 <span class="metric-value">{{ benchmark.evaluation_latency_sec | format_number }} <span class="unit">sec</span></span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Total time</span>
+                <span class="metric-value">{{ benchmark.evaluation_total_time_hours | format_number }} <span class="unit">h</span></span>
             </div>
             <div class="metric-card">
                 <span class="metric-label">Cost</span>

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime
 import math
 import re
 import unicodedata
@@ -42,12 +43,15 @@ class Benchmark(BaseModel):
     developers: str | list[str]
     url: str | None = Field(default=None)
     commit: str | None = None
+    date: datetime.date
 
     obfuscation_latency_sec: float
+    obfuscation_total_time_hours: float
     obfuscation_cost_usd: float
     obfuscation_peak_memory_gb: float | None = None
     storage_gb: float
     evaluation_latency_sec: float
+    evaluation_total_time_hours: float
     evaluation_cost_usd: float
     evaluation_peak_memory_gb: float | None = None
 
@@ -108,9 +112,11 @@ class Benchmark(BaseModel):
 
     @field_validator(
         "obfuscation_latency_sec",
+        "obfuscation_total_time_hours",
         "obfuscation_cost_usd",
         "storage_gb",
         "evaluation_latency_sec",
+        "evaluation_total_time_hours",
         "evaluation_cost_usd",
     )
     @classmethod
@@ -138,10 +144,12 @@ class Benchmark(BaseModel):
 # Metric fields for iteration
 METRIC_FIELDS: list[dict[str, str]] = [
     {"key": "obfuscation_latency_sec", "label": "Obf. latency", "unit": "sec"},
+    {"key": "obfuscation_total_time_hours", "label": "Obf. total time", "unit": "h"},
     {"key": "obfuscation_cost_usd", "label": "Obf. cost", "unit": "$"},
     {"key": "obfuscation_peak_memory_gb", "label": "Obf. peak mem", "unit": "GB"},
     {"key": "storage_gb", "label": "Storage", "unit": "GB"},
     {"key": "evaluation_latency_sec", "label": "Eval. latency", "unit": "sec"},
+    {"key": "evaluation_total_time_hours", "label": "Eval. total time", "unit": "h"},
     {"key": "evaluation_cost_usd", "label": "Eval. cost", "unit": "$"},
     {"key": "evaluation_peak_memory_gb", "label": "Eval. peak mem", "unit": "GB"},
 ]
