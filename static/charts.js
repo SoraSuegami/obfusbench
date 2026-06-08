@@ -85,6 +85,19 @@
             return p;
         });
 
+        // For date-based charts, when multiple entries share a date keep only
+        // the one with the smallest y value.
+        if (spec.xIsDate) {
+            var bestByDate = {};
+            points.forEach(function (p) {
+                var prev = bestByDate[p.x];
+                if (!prev || p.y < prev.y) bestByDate[p.x] = p;
+            });
+            points = Object.keys(bestByDate)
+                .map(function (k) { return bestByDate[k]; })
+                .sort(function (a, b) { return a.x - b.x; });
+        }
+
         var xTicks = spec.xIsDate
             ? { callback: function (v) { return tsToLabel(v); } }
             : {};
