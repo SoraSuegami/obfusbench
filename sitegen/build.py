@@ -13,6 +13,55 @@ from .models import METRIC_FIELDS, Benchmark
 from .utils import commit_url, format_number
 
 
+PROTECTED_OUTPUT_DIRS = (
+    ".git",
+    ".github",
+    "benchmarks",
+    "config",
+    "examples",
+    "schema",
+    "sitegen",
+    "static",
+    "templates",
+    "tests",
+)
+
+
+def _is_relative_to(path: Path, parent: Path) -> bool:
+    return path == parent or path.is_relative_to(parent)
+
+
+def validate_output_dir(output_dir: Path, project_root: Path) -> Path:
+    """Reject output paths where cleanup could delete repository sources."""
+    resolved_output = output_dir.resolve()
+    resolved_root = project_root.resolve()
+
+    if _is_relative_to(resolved_root, resolved_output):
+        raise ValueError(
+            f"Refusing to build into {resolved_output}: output directory would delete "
+            f"the project root {resolved_root}"
+        )
+
+    for name in PROTECTED_OUTPUT_DIRS:
+        protected = resolved_root / name
+        if _is_relative_to(resolved_output, protected):
+            raise ValueError(
+                f"Refusing to build into {resolved_output}: output directory is inside "
+                f"protected source directory {protected}"
+            )
+
+    return resolved_output
+
+
+def normalize_base_url(value: str | None) -> str:
+    """Normalize a configured base URL/path for absolute 404 links."""
+    if not value:
+        return ""
+    if value.startswith(("http://", "https://")):
+        return value.rstrip("/") + "/"
+    return "/" + value.strip("/") + "/"
+
+
 def load_site_config(config_path: Path) -> dict:
     """Load site configuration from YAML."""
     with open(config_path) as f:
@@ -33,6 +82,8 @@ def create_jinja_env(templates_dir: Path) -> Environment:
 
 def build_site(benchmarks: list[Benchmark], output_dir: Path, project_root: Path) -> None:
     """Generate the full static site."""
+    project_root = project_root.resolve()
+    output_dir = validate_output_dir(output_dir, project_root)
     config = load_site_config(project_root / "config" / "site.yaml")
     env = create_jinja_env(project_root / "templates")
 
@@ -69,9 +120,11 @@ def build_site(benchmarks: list[Benchmark], output_dir: Path, project_root: Path
         )
         (page_dir / "index.html").write_text(detail_html)
 
-    # Build 404 page
+    # Build 404 page. GitHub Pages serves this file at arbitrary nested URLs,
+    # so its asset and navigation links need a deployment-root base path.
     four04_tpl = env.get_template("404.html")
-    four04_html = four04_tpl.render(**common_ctx)
+    four04_ctx = {**common_ctx, "base_url": normalize_base_url(config.get("pages_base_url"))}
+    four04_html = four04_tpl.render(**four04_ctx)
     (output_dir / "404.html").write_text(four04_html)
 
     # Generate benchmarks.json

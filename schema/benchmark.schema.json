@@ -4,18 +4,25 @@
   "properties": {
     "id": {
       "title": "Id",
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "pattern": ".*[A-Za-z0-9].*"
     },
     "authors": {
       "anyOf": [
         {
-          "type": "string"
+          "type": "string",
+          "minLength": 1,
+          "pattern": ".*\\S.*"
         },
         {
           "items": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "pattern": ".*\\S.*"
           },
-          "type": "array"
+          "type": "array",
+          "minItems": 1
         }
       ],
       "title": "Authors"
@@ -23,21 +30,35 @@
     "developers": {
       "anyOf": [
         {
-          "type": "string"
+          "type": "string",
+          "minLength": 1,
+          "pattern": ".*\\S.*"
         },
         {
           "items": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "pattern": ".*\\S.*"
           },
-          "type": "array"
+          "type": "array",
+          "minItems": 1
         }
       ],
       "title": "Developers"
     },
     "url": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https?://[^\\s/]+(?:/[^\\s]*)?$"
+        },
+        {
+          "type": "null"
+        }
+      ],
       "default": null,
-      "title": "Url",
-      "type": "string"
+      "title": "Url"
     },
     "commit": {
       "anyOf": [
@@ -53,16 +74,19 @@
     },
     "obfuscation_latency_sec": {
       "title": "Obfuscation Latency Sec",
-      "type": "number"
+      "type": "number",
+      "minimum": 0
     },
     "obfuscation_cost_usd": {
       "title": "Obfuscation Cost Usd",
-      "type": "number"
+      "type": "number",
+      "minimum": 0
     },
     "obfuscation_peak_memory_gb": {
       "anyOf": [
         {
-          "type": "number"
+          "type": "number",
+          "minimum": 0
         },
         {
           "type": "null"
@@ -73,20 +97,24 @@
     },
     "storage_gb": {
       "title": "Storage Gb",
-      "type": "number"
+      "type": "number",
+      "minimum": 0
     },
     "evaluation_latency_sec": {
       "title": "Evaluation Latency Sec",
-      "type": "number"
+      "type": "number",
+      "minimum": 0
     },
     "evaluation_cost_usd": {
       "title": "Evaluation Cost Usd",
-      "type": "number"
+      "type": "number",
+      "minimum": 0
     },
     "evaluation_peak_memory_gb": {
       "anyOf": [
         {
-          "type": "number"
+          "type": "number",
+          "minimum": 0
         },
         {
           "type": "null"

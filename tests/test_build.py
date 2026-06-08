@@ -3,9 +3,10 @@
 import json
 from pathlib import Path
 
+import pytest
 import yaml
 
-from sitegen.build import build_site
+from sitegen.build import build_site, normalize_base_url, validate_output_dir
 from sitegen.load import load_benchmarks
 from sitegen.models import Benchmark
 
@@ -127,3 +128,53 @@ def test_benchmarks_json_no_slug(tmp_path):
 
     bj = json.loads((output_dir / "benchmarks.json").read_text())
     assert "slug" not in bj[0]
+
+def test_reject_project_root_output_dir(tmp_path):
+    project_root = tmp_path / "project"
+    project_root.mkdir()
+
+    with pytest.raises(ValueError, match="project root"):
+        validate_output_dir(project_root, project_root)
+
+
+def test_reject_project_root_parent_output_dir(tmp_path):
+    project_root = tmp_path / "project"
+    project_root.mkdir()
+
+    with pytest.raises(ValueError, match="project root"):
+        validate_output_dir(tmp_path, project_root)
+
+
+def test_reject_protected_source_output_dir(tmp_path):
+    project_root = tmp_path / "project"
+    protected = project_root / "sitegen"
+    protected.mkdir(parents=True)
+
+    with pytest.raises(ValueError, match="protected source directory"):
+        validate_output_dir(protected / "generated", project_root)
+
+
+def test_allow_site_output_dir(tmp_path):
+    project_root = tmp_path / "project"
+    project_root.mkdir()
+
+    assert validate_output_dir(project_root / "site", project_root) == project_root / "site"
+
+
+def test_normalize_base_url():
+    assert normalize_base_url("/obfusbench/") == "/obfusbench/"
+    assert normalize_base_url("obfusbench") == "/obfusbench/"
+    assert normalize_base_url("https://example.com/docs") == "https://example.com/docs/"
+
+
+def test_404_uses_configured_pages_base_url(tmp_path):
+    benchmarks_dir = tmp_path / "benchmarks"
+    benchmarks_dir.mkdir()
+    output_dir = tmp_path / "site"
+
+    benchmarks = load_benchmarks(benchmarks_dir)
+    build_site(benchmarks, output_dir, PROJECT_ROOT)
+
+    html = (output_dir / "404.html").read_text()
+    assert 'href="/obfusbench/static/styles.css"' in html
+    assert 'href="/obfusbench/"' in html

@@ -4,15 +4,16 @@ from __future__ import annotations
 
 import math
 import re
-from typing import Annotated
+import unicodedata
 
 from pydantic import BaseModel, Field, HttpUrl, field_validator, model_validator
 
 
 def slugify(text: str) -> str:
-    """Derive a URL-safe slug from a display name."""
-    s = text.lower().strip()
-    s = re.sub(r"[^\w\s-]", "", s)
+    """Derive an ASCII URL-safe slug from a display name."""
+    s = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
+    s = s.lower().strip()
+    s = re.sub(r"[^a-z0-9\s_-]", "", s)
     s = re.sub(r"[\s_-]+", "-", s)
     return s.strip("-")
 
@@ -39,7 +40,7 @@ class Benchmark(BaseModel):
     id: str
     authors: str | list[str]
     developers: str | list[str]
-    url: Annotated[str, Field(default=None)]  # optional
+    url: str | None = Field(default=None)
     commit: str | None = None
 
     obfuscation_latency_sec: float
@@ -58,14 +59,30 @@ class Benchmark(BaseModel):
     def id_must_be_nonempty(cls, v: str) -> str:
         if not v or not v.strip():
             raise ValueError("id must be a non-empty string")
-        return v
+        return v.strip()
 
     @field_validator("authors", "developers", mode="before")
     @classmethod
-    def normalize_people(cls, v: str | list[str]) -> list[str]:
+    def normalize_people(cls, v: str | list[str], info) -> list[str]:
         if isinstance(v, str):
-            return [v]
-        return v
+            values = [v]
+        elif isinstance(v, list):
+            values = v
+        else:
+            return v
+
+        names: list[str] = []
+        for item in values:
+            if not isinstance(item, str):
+                raise ValueError(f"{info.field_name} must contain strings")
+            name = item.strip()
+            if not name:
+                raise ValueError(f"{info.field_name} must contain non-empty names")
+            names.append(name)
+
+        if not names:
+            raise ValueError(f"{info.field_name} must contain at least one name")
+        return names
 
     @field_validator("url", mode="before")
     @classmethod
@@ -110,7 +127,11 @@ class Benchmark(BaseModel):
 
     @model_validator(mode="after")
     def set_slug(self) -> "Benchmark":
+        if not re.search(r"[A-Za-z0-9]", self.id):
+            raise ValueError("id must contain at least one URL-safe ASCII letter or digit")
         self.slug = slugify(self.id)
+        if not self.slug:
+            raise ValueError("id must contain at least one URL-safe character")
         return self
 
 
@@ -129,9 +150,37 @@ METRIC_FIELDS: list[dict[str, str]] = [
 def generate_json_schema() -> dict:
     """Generate JSON Schema from the Pydantic model, excluding internal fields."""
     schema = Benchmark.model_json_schema()
-    # Remove the slug field since it's derived
-    if "properties" in schema and "slug" in schema["properties"]:
-        del schema["properties"]["slug"]
+    properties = schema.get("properties", {})
+
+    # Remove the slug field since it's derived.
+    properties.pop("slug", None)
     if "required" in schema and "slug" in schema["required"]:
         schema["required"].remove("slug")
+
+    # Mirror runtime validation closely enough for schema-first contributors.
+    if "id" in properties:
+        properties["id"].update({"minLength": 1, "pattern": r".*[A-Za-z0-9].*"})
+
+    for key in ("authors", "developers"):
+        prop = properties.get(key, {})
+        for branch in prop.get("anyOf", []):
+            if branch.get("type") == "string":
+                branch.update({"minLength": 1, "pattern": r".*\S.*"})
+            elif branch.get("type") == "array":
+                branch["minItems"] = 1
+                branch.setdefault("items", {}).update({"minLength": 1, "pattern": r".*\S.*"})
+
+    url_prop = properties.get("url", {})
+    for branch in url_prop.get("anyOf", []):
+        if branch.get("type") == "string":
+            branch.update({"format": "uri", "pattern": r"^https?://[^\s/]+(?:/[^\s]*)?$"})
+
+    for metric in METRIC_FIELDS:
+        prop = properties.get(metric["key"], {})
+        if prop.get("type") == "number":
+            prop["minimum"] = 0
+        for branch in prop.get("anyOf", []):
+            if branch.get("type") == "number":
+                branch["minimum"] = 0
+
     return schema

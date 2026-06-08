@@ -108,6 +108,43 @@ def test_optional_url_and_commit():
     assert bm.commit is None
 
 
+def test_explicit_null_url():
+    data = {**VALID_DATA, "url": None}
+    bm = Benchmark(**data)
+    assert bm.url is None
+
+
+def test_trim_people_names():
+    data = {**VALID_DATA, "authors": " Alice ", "developers": [" Carol ", "Dave"]}
+    bm = Benchmark(**data)
+    assert bm.authors == ["Alice"]
+    assert bm.developers == ["Carol", "Dave"]
+
+
+def test_reject_empty_people_names():
+    data = {**VALID_DATA, "authors": ["Alice", ""]}
+    with pytest.raises(ValidationError, match="non-empty names"):
+        Benchmark(**data)
+
+
+def test_reject_empty_people_list():
+    data = {**VALID_DATA, "developers": []}
+    with pytest.raises(ValidationError, match="at least one name"):
+        Benchmark(**data)
+
+
+def test_reject_id_with_empty_slug():
+    data = {**VALID_DATA, "id": "!!!"}
+    with pytest.raises(ValidationError, match="URL-safe"):
+        Benchmark(**data)
+
+
+def test_reject_unicode_only_id_without_ascii_slug_source():
+    data = {**VALID_DATA, "id": "é"}
+    with pytest.raises(ValidationError, match="ASCII"):
+        Benchmark(**data)
+
+
 def test_slug_derivation():
     assert slugify("My Cool iO Impl") == "my-cool-io-impl"
     assert slugify("  spaces  ") == "spaces"

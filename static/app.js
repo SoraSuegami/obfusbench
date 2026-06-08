@@ -174,7 +174,6 @@
 
         // Keyboard support
         th.setAttribute("tabindex", "0");
-        th.setAttribute("role", "columnheader button");
         th.addEventListener("keydown", function (e) {
             if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();

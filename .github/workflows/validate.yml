@@ -37,6 +37,9 @@ jobs:
       - name: Validate benchmarks
         run: python -m sitegen validate
 
+      - name: Check generated schema is committed
+        run: git diff --exit-code schema/benchmark.schema.json
+
       - name: Build site
         run: python -m sitegen build --output site
 
