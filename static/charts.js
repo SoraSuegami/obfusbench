@@ -113,6 +113,13 @@
                         borderColor: "#2563eb",
                         pointRadius: 6,
                         pointHoverRadius: 8,
+                        // Connect points with a dashed polyline only on
+                        // date-axis charts; others stay scatter-only.
+                        showLine: spec.xIsDate,
+                        borderDash: [6, 4],
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0,
                     },
                 ],
             },
