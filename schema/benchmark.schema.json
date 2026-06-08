@@ -20,6 +20,20 @@
       ],
       "title": "Authors"
     },
+    "developers": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      ],
+      "title": "Developers"
+    },
     "url": {
       "default": null,
       "title": "Url",
@@ -85,6 +99,7 @@
   "required": [
     "id",
     "authors",
+    "developers",
     "obfuscation_latency_sec",
     "obfuscation_cost_usd",
     "storage_gb",

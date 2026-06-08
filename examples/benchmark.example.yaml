@@ -2,6 +2,9 @@ id: "Example iO Implementation"
 authors:
   - Alice Example
   - Bob Example
+developers:
+  - Carol Developer
+  - Dave Developer
 url: "https://github.com/example/io-impl"
 commit: "abc1234"
 obfuscation_latency_sec: 123.45

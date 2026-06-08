@@ -50,7 +50,7 @@
         var tbody = document.querySelector("#spotlight-table tbody");
         ths.forEach(function (th, i) {
             var key = th.getAttribute("data-sort");
-            if (key === "id" || key === "authors" || key === "evaluation_latency_sec") return;
+            if (key === "id" || key === "authors" || key === "developers" || key === "evaluation_latency_sec") return;
             var cell = bestRow.cells[i];
             if (!cell || !cell.hasAttribute("data-value")) return;
 

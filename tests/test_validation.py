@@ -9,6 +9,7 @@ from sitegen.models import Benchmark, slugify
 VALID_DATA = {
     "id": "Test Implementation",
     "authors": ["Alice", "Bob"],
+    "developers": ["Carol", "Dave"],
     "url": "https://github.com/example/repo",
     "commit": "abc1234",
     "obfuscation_latency_sec": 100.0,
@@ -26,12 +27,19 @@ def test_accept_valid_yaml():
     assert bm.id == "Test Implementation"
     assert bm.slug == "test-implementation"
     assert bm.authors == ["Alice", "Bob"]
+    assert bm.developers == ["Carol", "Dave"]
 
 
 def test_normalize_authors_string():
     data = {**VALID_DATA, "authors": "Alice"}
     bm = Benchmark(**data)
     assert bm.authors == ["Alice"]
+
+
+def test_normalize_developers_string():
+    data = {**VALID_DATA, "developers": "Carol"}
+    bm = Benchmark(**data)
+    assert bm.developers == ["Carol"]
 
 
 def test_normalize_commit_empty_string():

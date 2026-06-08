@@ -38,6 +38,7 @@ class Benchmark(BaseModel):
 
     id: str
     authors: str | list[str]
+    developers: str | list[str]
     url: Annotated[str, Field(default=None)]  # optional
     commit: str | None = None
 
@@ -59,9 +60,9 @@ class Benchmark(BaseModel):
             raise ValueError("id must be a non-empty string")
         return v
 
-    @field_validator("authors", mode="before")
+    @field_validator("authors", "developers", mode="before")
     @classmethod
-    def normalize_authors(cls, v: str | list[str]) -> list[str]:
+    def normalize_people(cls, v: str | list[str]) -> list[str]:
         if isinstance(v, str):
             return [v]
         return v

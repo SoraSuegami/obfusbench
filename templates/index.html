@@ -30,6 +30,7 @@
                 <tr>
                     <th data-sort="id" aria-sort="none">Implementation</th>
                     <th data-sort="authors" aria-sort="none">Authors</th>
+                    <th data-sort="developers" aria-sort="none">Developers</th>
                     {% for m in metric_fields %}
                     <th data-sort="{{ m.key }}" aria-sort="none" class="numeric">
                         {{ m.label }}
@@ -43,6 +44,7 @@
                 <tr>
                     <td><a href="{{ base_url }}implementations/{{ bm.slug }}/">{{ bm.id }}</a></td>
                     <td>{{ bm.authors | join(", ") }}</td>
+                    <td>{{ bm.developers | join(", ") }}</td>
                     {% for m in metric_fields %}
                     <td class="numeric" data-value="{% if bm[m.key] is not none %}{{ bm[m.key] }}{% endif %}">{{ bm[m.key] | format_number }}</td>
                     {% endfor %}

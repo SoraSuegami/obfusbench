@@ -13,6 +13,7 @@ from sitegen.models import Benchmark
 VALID_DATA = {
     "id": "Test Implementation",
     "authors": ["Alice", "Bob"],
+    "developers": ["Carol", "Dave"],
     "url": "https://github.com/example/repo",
     "commit": "abc1234",
     "obfuscation_latency_sec": 100.0,
@@ -70,6 +71,7 @@ def test_build_with_one_benchmark(tmp_path):
     detail_html = detail_path.read_text()
     assert "Test Implementation" in detail_html
     assert "Alice" in detail_html
+    assert "Carol" in detail_html
 
     # benchmarks.json
     bj = json.loads((output_dir / "benchmarks.json").read_text())

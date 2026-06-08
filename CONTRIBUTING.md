@@ -27,7 +27,8 @@ Thank you for contributing a benchmark entry! This guide explains how to submit 
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `id` | string | **yes** | Display name for your implementation (must be unique) |
-| `authors` | string or list of strings | **yes** | Author name(s) |
+| `authors` | string or list of strings | **yes** | Author name(s) of the underlying construction or paper |
+| `developers` | string or list of strings | **yes** | Developer name(s) for the implementation |
 | `url` | string (http/https URL) | no | Link to source code or paper |
 | `commit` | string | no | Commit hash or version identifier |
 | `obfuscation_latency_sec` | float >= 0 | **yes** | Obfuscation time in seconds |

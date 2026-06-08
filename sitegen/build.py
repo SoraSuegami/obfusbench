@@ -78,7 +78,6 @@ def build_site(benchmarks: list[Benchmark], output_dir: Path, project_root: Path
     data = []
     for bm in benchmarks:
         entry = bm.model_dump()
-        # Ensure authors is list
         entry.pop("slug", None)
         data.append(entry)
     (output_dir / "benchmarks.json").write_text(

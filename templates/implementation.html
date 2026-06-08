@@ -12,6 +12,8 @@
         <dl>
             <dt>Authors</dt>
             <dd>{{ benchmark.authors | join(", ") }}</dd>
+            <dt>Developers</dt>
+            <dd>{{ benchmark.developers | join(", ") }}</dd>
             {% if benchmark.url %}
             <dt>URL</dt>
             <dd><a href="{{ benchmark.url }}" rel="noopener noreferrer">{{ benchmark.url }}</a></dd>
