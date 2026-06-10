@@ -22,11 +22,16 @@
     }
 
     // Each spec maps a benchmark to an {x, y} point plus axis metadata.
+    // "goal" draws a horizontal line marking the ideal target value; those
+    // charts use a logarithmic y-axis so the goal stays visible next to
+    // astronomically larger measurements.
     var SPECS = [
         {
             xTitle: "Date",
             yTitle: "Evaluation total time (hours)",
             xIsDate: true,
+            goal: 1,
+            goalLabel: "Goal: 1 hour",
             point: function (b) {
                 return { x: dateToTs(b.date), y: b.evaluation_total_time_hours };
             },
@@ -35,6 +40,8 @@
             xTitle: "Date",
             yTitle: "Obfuscation total time (hours)",
             xIsDate: true,
+            goal: 1000,
+            goalLabel: "Goal: 1000 hours",
             point: function (b) {
                 return { x: dateToTs(b.date), y: b.obfuscation_total_time_hours };
             },
@@ -43,6 +50,11 @@
             xTitle: "Obfuscated circuit size (GB)",
             yTitle: "Evaluation total time (hours)",
             xIsDate: false,
+            // Diagonal goal line connecting 1000 GB on the x-axis with
+            // 1 hour on the y-axis.
+            goalX: 1000,
+            goalY: 1,
+            goalLabel: "Goal: 1000 GB, 1 hour",
             point: function (b) {
                 return { x: b.storage_gb, y: b.evaluation_total_time_hours };
             },
@@ -64,6 +76,66 @@
             },
         },
     ];
+
+    // Draws a dashed goal line: horizontal at y when only y is given, or
+    // diagonal connecting x on the bottom axis with y on the left axis.
+    var goalLinePlugin = {
+        id: "goalLine",
+        afterDatasetsDraw: function (chart) {
+            var opts = chart.options.plugins.goalLine;
+            if (!opts || opts.y == null) return;
+            var area = chart.chartArea;
+            var ctx = chart.ctx;
+
+            ctx.save();
+            ctx.strokeStyle = "#16a34a";
+            ctx.lineWidth = 2;
+            ctx.setLineDash([8, 5]);
+            ctx.font = "600 12px " + (Chart.defaults.font.family || "sans-serif");
+            ctx.fillStyle = "#16a34a";
+
+            var y = chart.scales.y.getPixelForValue(opts.y);
+            if (opts.x != null) {
+                // Diagonal: from (goal x, bottom axis) up to (left axis, goal y).
+                var x = chart.scales.x.getPixelForValue(opts.x);
+                if (isFinite(x) && isFinite(y)) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, area.bottom);
+                    ctx.lineTo(area.left, y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.textAlign = "left";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText(
+                        opts.label,
+                        (area.left + x) / 2 + 10,
+                        (y + area.bottom) / 2 - 10
+                    );
+                }
+            } else if (isFinite(y) && y >= area.top && y <= area.bottom) {
+                ctx.beginPath();
+                ctx.moveTo(area.left, y);
+                ctx.lineTo(area.right, y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.textAlign = "right";
+                ctx.textBaseline = "bottom";
+                ctx.fillText(opts.label, area.right - 6, y - 4);
+            }
+            ctx.restore();
+        },
+    };
+    Chart.register(goalLinePlugin);
+
+    // Label only powers of ten on logarithmic axes (e.g. "1e+38").
+    function logTickLabel(value) {
+        if (value <= 0) return "";
+        var exp = Math.log10(value);
+        if (Math.abs(exp - Math.round(exp)) > 1e-9) return "";
+        exp = Math.round(exp);
+        if (exp >= 0 && exp <= 3) return String(Math.pow(10, exp));
+        return "1e" + (exp > 0 ? "+" : "") + exp;
+    }
 
     function initPanelCharts(panel) {
         var dataEl = panel.querySelector(".benchmark-data");
@@ -105,6 +177,38 @@
                 ? { callback: function (v) { return tsToLabel(v); } }
                 : {};
 
+            // Goal charts use log axes so the goal line and the (much
+            // larger) measured values fit on the same chart. Pad the range
+            // a decade past the goal so the line sits inside the plot area.
+            // Diagonal-goal charts get two decades of padding so the
+            // segment near the origin corner stays legible.
+            var goalPad = spec.goalX != null ? 100 : 10;
+            var yGoal = spec.goal != null ? spec.goal : spec.goalY;
+            var yScale = yGoal != null
+                ? {
+                    type: "logarithmic",
+                    suggestedMin: yGoal / goalPad,
+                    title: { display: true, text: spec.yTitle },
+                    ticks: { callback: logTickLabel },
+                }
+                : {
+                    type: "linear",
+                    beginAtZero: true,
+                    title: { display: true, text: spec.yTitle },
+                };
+            var xScale = spec.goalX != null
+                ? {
+                    type: "logarithmic",
+                    suggestedMin: spec.goalX / goalPad,
+                    title: { display: true, text: spec.xTitle },
+                    ticks: { callback: logTickLabel },
+                }
+                : {
+                    type: "linear",
+                    title: { display: true, text: spec.xTitle },
+                    ticks: xTicks,
+                };
+
             var config = {
                 type: "scatter",
                 data: {
@@ -131,6 +235,9 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { display: false },
+                        goalLine: yGoal != null
+                            ? { x: spec.goalX, y: yGoal, label: spec.goalLabel }
+                            : { y: null },
                         tooltip: {
                             callbacks: {
                                 label: function (ctx) {
@@ -155,16 +262,8 @@
                         },
                     },
                     scales: {
-                        x: {
-                            type: "linear",
-                            title: { display: true, text: spec.xTitle },
-                            ticks: xTicks,
-                        },
-                        y: {
-                            type: "linear",
-                            beginAtZero: true,
-                            title: { display: true, text: spec.yTitle },
-                        },
+                        x: xScale,
+                        y: yScale,
                     },
                 },
             };
