@@ -194,7 +194,8 @@ tbody tr:hover {
     background: var(--color-row-hover);
 }
 
-/* Spotlight */
+/* Spotlight — disabled for now; re-enable together with the markup in
+   templates/index.html and the code in static/app.js.
 .spotlight {
     margin-bottom: 2rem;
     border: 2px solid var(--color-accent);
@@ -298,6 +299,7 @@ tbody tr:hover {
         font-size: 2.2rem;
     }
 }
+*/
 
 /* Empty state */
 .empty-state {

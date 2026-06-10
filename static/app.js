@@ -75,6 +75,9 @@
         if (!table) return;
 
         // --- Spotlight: find best eval latency ---
+        // Disabled for now; re-enable by uncommenting this block and the
+        // matching markup in templates/index.html.
+        /*
         (function buildSpotlight() {
             var spotlight = panel.querySelector(".spotlight");
             if (!spotlight) return;
@@ -137,6 +140,7 @@
 
             spotlight.removeAttribute("hidden");
         })();
+        */
 
         // --- Table sorting ---
 

@@ -36,6 +36,8 @@
         </section>
         <script class="benchmark-data" type="application/json">{{ t.chart_data | tojson }}</script>
 
+        {# Spotlight (Best Eval. Latency) disabled for now; re-enable by
+           uncommenting this block and the matching code in static/app.js.
         <section class="spotlight" hidden>
             <div class="spotlight-inner">
                 <div class="spotlight-hero">
@@ -51,6 +53,7 @@
                 </div>
             </div>
         </section>
+        #}
 
         <div class="table-wrap">
             <table class="leaderboard-table" aria-label="Benchmark leaderboard for {{ t.name }}">
