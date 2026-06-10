@@ -93,6 +93,38 @@ code {
     margin-top: 2rem;
 }
 
+/* Target tabs (top-level switch between benchmark targets) */
+.target-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    border-bottom: 2px solid var(--color-border);
+    margin-bottom: 1.5rem;
+}
+
+.target-tab {
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0.6rem 1rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.target-tab:hover {
+    color: var(--color-accent);
+}
+
+.target-tab.is-active {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+}
+
 .leaderboard h2 {
     font-size: 1.25rem;
     margin-bottom: 0.25rem;

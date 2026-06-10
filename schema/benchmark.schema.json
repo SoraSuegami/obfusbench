@@ -77,6 +77,21 @@
       "title": "Date",
       "type": "string"
     },
+    "target": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "pattern": ".*\\S.*"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Benchmark target id (see targets in config/site.yaml). Defaults to the first configured target when omitted.",
+      "title": "Target"
+    },
     "obfuscation_latency_sec": {
       "title": "Obfuscation Latency Sec",
       "type": "number",

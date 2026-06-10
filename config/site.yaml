@@ -2,5 +2,11 @@ site_name: "ObfusBench"
 site_tagline: "Public benchmark leaderboard for iO implementations"
 site_description: "A public leaderboard for benchmarking iO implementations on a standard benchmark circuit."
 repository_url: "https://github.com/SoraSuegami/obfusbench"
-benchmark_name: "Standard benchmark circuit"
+# Benchmark targets. The first entry is shown by default on the leaderboard;
+# benchmark YAML files reference a target by its id (omitted = first target).
+targets:
+  - id: "obfuscated-prf-110"
+    name: "Obfuscated PRF for 110 input bits"
+  - id: "witness-encryption-64"
+    name: "Witness encryption for 64 witness bits"
 pages_base_url: "/obfusbench/"

@@ -4,6 +4,7 @@ developers: "Sora Suegami, Enrico Bottazzi, and Gayeong Park"
 url: "https://github.com/MachinaIO/mxx"
 commit: "c7c4fea"
 date: "2026-06-02"
+target: "obfuscated-prf-110"
 obfuscation_latency_sec: 7222.8969880742015
 obfuscation_total_time_hours: 3.295816263033e45
 obfuscation_cost_usd: 1.44686e46

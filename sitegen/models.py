@@ -44,6 +44,13 @@ class Benchmark(BaseModel):
     url: str | None = Field(default=None)
     commit: str | None = None
     date: datetime.date
+    target: str | None = Field(
+        default=None,
+        description=(
+            "Benchmark target id (see targets in config/site.yaml). "
+            "Defaults to the first configured target when omitted."
+        ),
+    )
 
     obfuscation_latency_sec: float
     obfuscation_total_time_hours: float
@@ -100,6 +107,15 @@ class Benchmark(BaseModel):
         # Let pydantic's HttpUrl do the heavy lifting
         HttpUrl(v)
         return v
+
+    @field_validator("target", mode="before")
+    @classmethod
+    def normalize_target(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        if not isinstance(v, str) or not v.strip():
+            raise ValueError("target must be a non-empty string")
+        return v.strip()
 
     @field_validator("commit", mode="before")
     @classmethod
@@ -182,6 +198,11 @@ def generate_json_schema() -> dict:
     for branch in url_prop.get("anyOf", []):
         if branch.get("type") == "string":
             branch.update({"format": "uri", "pattern": r"^https?://[^\s/]+(?:/[^\s]*)?$"})
+
+    target_prop = properties.get("target", {})
+    for branch in target_prop.get("anyOf", []):
+        if branch.get("type") == "string":
+            branch.update({"minLength": 1, "pattern": r".*\S.*"})
 
     for metric in METRIC_FIELDS:
         prop = properties.get(metric["key"], {})

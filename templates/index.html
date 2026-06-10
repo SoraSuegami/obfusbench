@@ -4,82 +4,94 @@
 
 {% block content %}
 <section class="leaderboard">
-    <h2>{{ site.benchmark_name }}</h2>
-    <p class="impl-count">{{ benchmarks | length }} implementation{{ "s" if benchmarks | length != 1 else "" }} submitted</p>
-
-    {% if benchmarks %}
-    <section class="charts" id="charts">
-        <h3>Trends</h3>
-        <div class="chart-tabs" role="tablist" aria-label="Chart selection">
-            <button type="button" class="chart-tab is-active" role="tab" data-chart="0">Eval. total time vs date</button>
-            <button type="button" class="chart-tab" role="tab" data-chart="1">Obf. total time vs date</button>
-            <button type="button" class="chart-tab" role="tab" data-chart="2">Eval. total time vs circuit size</button>
-            <button type="button" class="chart-tab" role="tab" data-chart="3">Eval. latency vs date</button>
-            <button type="button" class="chart-tab" role="tab" data-chart="4">Obf. latency vs date</button>
-        </div>
-        <div class="chart-canvas-wrap">
-            <canvas id="chart-canvas" aria-label="Benchmark trend chart" role="img"></canvas>
-        </div>
-    </section>
-    <script id="benchmark-data" type="application/json">{{ chart_data | tojson }}</script>
-
-    <section id="spotlight" class="spotlight" hidden>
-        <div class="spotlight-inner">
-            <div class="spotlight-hero">
-                <span class="spotlight-label">Best Eval. Latency</span>
-                <span class="spotlight-value" id="spotlight-value"></span>
-                <span class="spotlight-unit">sec</span>
-                <a class="spotlight-name" id="spotlight-name" href="#"></a>
-            </div>
-            <div class="spotlight-details">
-                <table class="spotlight-table" id="spotlight-table">
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-
-    <div class="table-wrap">
-        <table id="leaderboard" aria-label="Benchmark leaderboard">
-            <thead>
-                <tr>
-                    <th data-sort="id" aria-sort="none">Implementation</th>
-                    <th data-sort="authors" aria-sort="none">Authors</th>
-                    <th data-sort="developers" aria-sort="none">Developers</th>
-                    {% for m in metric_fields %}
-                    <th data-sort="{{ m.key }}" aria-sort="none" class="numeric">
-                        {{ m.label }}
-                        <span class="unit">({{ m.unit }})</span>
-                    </th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for bm in benchmarks %}
-                <tr>
-                    <td><a href="{{ base_url }}implementations/{{ bm.slug }}/">{{ bm.id }}</a></td>
-                    <td>{{ bm.authors | join(", ") }}</td>
-                    <td>{{ bm.developers | join(", ") }}</td>
-                    {% for m in metric_fields %}
-                    <td class="numeric" data-value="{% if bm[m.key] is not none %}{{ bm[m.key] }}{% endif %}">{{ bm[m.key] | format_number }}</td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="target-tabs" role="tablist" aria-label="Benchmark target selection">
+        {% for t in targets %}
+        <button type="button" class="target-tab{% if loop.first %} is-active{% endif %}" role="tab"
+                aria-selected="{{ 'true' if loop.first else 'false' }}"
+                data-target="{{ t.id }}">{{ t.name }}</button>
+        {% endfor %}
     </div>
-    {% else %}
-    <div class="empty-state">
-        <p>No benchmark entries yet.</p>
-        <p>Be the first to submit! See the <a href="{{ site.repository_url }}">contributing guide</a> for instructions.</p>
-    </div>
-    {% endif %}
+
+    {% for t in targets %}
+    <section class="target-panel" data-target="{{ t.id }}" role="tabpanel"{% if not loop.first %} hidden{% endif %}>
+        <h2>{{ t.name }}</h2>
+        <p class="impl-count">{{ t.benchmarks | length }} implementation{{ "s" if t.benchmarks | length != 1 else "" }} submitted</p>
+
+        {% if t.benchmarks %}
+        <section class="charts">
+            <h3>Trends</h3>
+            <div class="chart-tabs" role="tablist" aria-label="Chart selection">
+                <button type="button" class="chart-tab is-active" role="tab" data-chart="0">Eval. total time vs date</button>
+                <button type="button" class="chart-tab" role="tab" data-chart="1">Obf. total time vs date</button>
+                <button type="button" class="chart-tab" role="tab" data-chart="2">Eval. total time vs circuit size</button>
+                <button type="button" class="chart-tab" role="tab" data-chart="3">Eval. latency vs date</button>
+                <button type="button" class="chart-tab" role="tab" data-chart="4">Obf. latency vs date</button>
+            </div>
+            <div class="chart-canvas-wrap">
+                <canvas class="chart-canvas" aria-label="Benchmark trend chart for {{ t.name }}" role="img"></canvas>
+            </div>
+        </section>
+        <script class="benchmark-data" type="application/json">{{ t.chart_data | tojson }}</script>
+
+        <section class="spotlight" hidden>
+            <div class="spotlight-inner">
+                <div class="spotlight-hero">
+                    <span class="spotlight-label">Best Eval. Latency</span>
+                    <span class="spotlight-value"></span>
+                    <span class="spotlight-unit">sec</span>
+                    <a class="spotlight-name" href="#"></a>
+                </div>
+                <div class="spotlight-details">
+                    <table class="spotlight-table">
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <div class="table-wrap">
+            <table class="leaderboard-table" aria-label="Benchmark leaderboard for {{ t.name }}">
+                <thead>
+                    <tr>
+                        <th data-sort="id" aria-sort="none">Implementation</th>
+                        <th data-sort="authors" aria-sort="none">Authors</th>
+                        <th data-sort="developers" aria-sort="none">Developers</th>
+                        {% for m in metric_fields %}
+                        <th data-sort="{{ m.key }}" aria-sort="none" class="numeric">
+                            {{ m.label }}
+                            <span class="unit">({{ m.unit }})</span>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bm in t.benchmarks %}
+                    <tr>
+                        <td><a href="{{ base_url }}implementations/{{ bm.slug }}/">{{ bm.id }}</a></td>
+                        <td>{{ bm.authors | join(", ") }}</td>
+                        <td>{{ bm.developers | join(", ") }}</td>
+                        {% for m in metric_fields %}
+                        <td class="numeric" data-value="{% if bm[m.key] is not none %}{{ bm[m.key] }}{% endif %}">{{ bm[m.key] | format_number }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No benchmark entries yet.</p>
+            <p>Be the first to submit! See the <a href="{{ site.repository_url }}">contributing guide</a> for instructions.</p>
+        </div>
+        {% endif %}
+    </section>
+    {% endfor %}
 </section>
 {% endblock %}
 
 {% block scripts %}
 <script src="{{ base_url }}static/app.js"></script>
-{% if benchmarks %}
+{% if total_count %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="{{ base_url }}static/charts.js"></script>
 {% endif %}

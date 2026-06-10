@@ -68,6 +68,27 @@ def load_site_config(config_path: Path) -> dict:
         return yaml.safe_load(f)
 
 
+def load_targets(config: dict) -> list[dict]:
+    """Read the configured benchmark targets; the first one is the default."""
+    raw = config.get("targets")
+    if not raw:
+        return [{"id": "default", "name": config.get("benchmark_name", "Benchmark results")}]
+
+    targets: list[dict] = []
+    seen: set[str] = set()
+    for entry in raw:
+        if not isinstance(entry, dict) or not entry.get("id") or not entry.get("name"):
+            raise ValueError(
+                "each entry in config/site.yaml 'targets' must have non-empty 'id' and 'name'"
+            )
+        tid = str(entry["id"]).strip()
+        if tid in seen:
+            raise ValueError(f"duplicate target id '{tid}' in config/site.yaml")
+        seen.add(tid)
+        targets.append({"id": tid, "name": str(entry["name"]).strip()})
+    return targets
+
+
 def create_jinja_env(templates_dir: Path) -> Environment:
     """Create a Jinja2 environment with autoescaping and helpers."""
     env = Environment(
@@ -100,9 +121,23 @@ def build_site(benchmarks: list[Benchmark], output_dir: Path, project_root: Path
         "base_url": base_url,
     }
 
-    # Build index page
-    chart_data = [
-        {
+    # Group benchmarks by target; entries without a target use the default
+    # (first configured) target.
+    targets = load_targets(config)
+    default_target_id = targets[0]["id"]
+    by_target: dict[str, list[Benchmark]] = {t["id"]: [] for t in targets}
+    for bm in benchmarks:
+        if bm.target is None:
+            bm.target = default_target_id
+        if bm.target not in by_target:
+            raise ValueError(
+                f"benchmark '{bm.id}' references unknown target '{bm.target}' "
+                f"(valid targets: {', '.join(by_target)})"
+            )
+        by_target[bm.target].append(bm)
+
+    def chart_entry(bm: Benchmark) -> dict:
+        return {
             "id": bm.id,
             "slug": bm.slug,
             "date": bm.date.isoformat(),
@@ -112,15 +147,25 @@ def build_site(benchmarks: list[Benchmark], output_dir: Path, project_root: Path
             "evaluation_total_time_hours": bm.evaluation_total_time_hours,
             "storage_gb": bm.storage_gb,
         }
-        for bm in benchmarks
+
+    # Build index page
+    target_ctx = [
+        {
+            "id": t["id"],
+            "name": t["name"],
+            "benchmarks": by_target[t["id"]],
+            "chart_data": [chart_entry(bm) for bm in by_target[t["id"]]],
+        }
+        for t in targets
     ]
     index_tpl = env.get_template("index.html")
     index_html = index_tpl.render(
-        benchmarks=benchmarks, chart_data=chart_data, **common_ctx
+        targets=target_ctx, total_count=len(benchmarks), **common_ctx
     )
     (output_dir / "index.html").write_text(index_html)
 
     # Build detail pages
+    target_names = {t["id"]: t["name"] for t in targets}
     impl_dir = output_dir / "implementations"
     detail_tpl = env.get_template("implementation.html")
     for bm in benchmarks:
@@ -129,6 +174,7 @@ def build_site(benchmarks: list[Benchmark], output_dir: Path, project_root: Path
         # Depth for relative paths: implementations/<slug>/index.html -> ../../
         detail_html = detail_tpl.render(
             benchmark=bm,
+            target_name=target_names[bm.target],
             base_url="../../",
             site=config,
             commit_link=commit_url(bm.url, bm.commit),

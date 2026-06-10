@@ -184,3 +184,45 @@ def test_reject_duplicate_slug(tmp_path):
 
     with pytest.raises(SystemExit):
         load_benchmarks(tmp_path)
+
+
+def test_target_normalization():
+    """target is optional, stripped, and rejects blank strings."""
+    bm = Benchmark(**VALID_DATA)
+    assert bm.target is None
+
+    bm = Benchmark(**{**VALID_DATA, "target": "  obfuscated-prf-110  "})
+    assert bm.target == "obfuscated-prf-110"
+
+    with pytest.raises(ValidationError):
+        Benchmark(**{**VALID_DATA, "target": "   "})
+
+
+def test_loader_fills_default_target(tmp_path):
+    from sitegen.load import load_benchmarks
+
+    import yaml
+
+    (tmp_path / "a.yaml").write_text(yaml.dump(VALID_DATA))
+    benchmarks = load_benchmarks(
+        tmp_path,
+        allowed_targets=["obfuscated-prf-110", "witness-encryption-64"],
+        default_target="obfuscated-prf-110",
+    )
+    assert benchmarks[0].target == "obfuscated-prf-110"
+
+
+def test_loader_rejects_unknown_target(tmp_path):
+    from sitegen.load import load_benchmarks
+
+    import yaml
+
+    (tmp_path / "a.yaml").write_text(
+        yaml.dump({**VALID_DATA, "target": "no-such-target"})
+    )
+    with pytest.raises(SystemExit):
+        load_benchmarks(
+            tmp_path,
+            allowed_targets=["obfuscated-prf-110"],
+            default_target="obfuscated-prf-110",
+        )

@@ -4,6 +4,7 @@ developers: "Sora Suegami"
 url: "https://github.com/MachinaIO/mxx"
 commit: "c7c4fea"
 date: "2025-04-03"
+target: "obfuscated-prf-110"
 obfuscation_latency_sec: 38134.547105448204
 obfuscation_total_time_hours: 1.350684205754e46
 obfuscation_cost_usd: 5.92950e46

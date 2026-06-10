@@ -32,6 +32,7 @@ Thank you for contributing a benchmark entry! This guide explains how to submit 
 | `url` | string (http/https URL) | no | Link to source code or paper |
 | `commit` | string | no | Commit hash or version identifier |
 | `date` | string (`YYYY-MM-DD`) | **yes** | Date the benchmark was measured; used as the x-axis on trend charts |
+| `target` | string | no | Benchmark target id from `config/site.yaml` (e.g. `obfuscated-prf-110`, `witness-encryption-64`); defaults to the first configured target |
 | `obfuscation_latency_sec` | float >= 0 | **yes** | Obfuscation time in seconds |
 | `obfuscation_total_time_hours` | float >= 0 | **yes** | Total obfuscation wall-clock time in hours |
 | `obfuscation_cost_usd` | float >= 0 | **yes** | Obfuscation cost in USD |
@@ -58,6 +59,7 @@ Thank you for contributing a benchmark entry! This guide explains how to submit 
 | `must be finite` | No `inf` or `NaN` values |
 | `extra fields not permitted` | Remove unknown keys — check for typos |
 | `Duplicate id` | Choose a unique `id` |
+| `unknown target` | Use one of the target ids defined in `config/site.yaml` |
 | `url must be an http or https URL` | Use a full URL starting with `http://` or `https://` |
 
 ## PR process

@@ -181,3 +181,62 @@ def test_404_uses_configured_pages_base_url(tmp_path):
     html = (output_dir / "404.html").read_text()
     assert 'href="/obfusbench/static/styles.css"' in html
     assert 'href="/obfusbench/"' in html
+
+
+def test_index_has_target_tabs_and_panels(tmp_path):
+    """Index renders one tab and one panel per configured target."""
+    benchmarks_dir = tmp_path / "benchmarks"
+    benchmarks_dir.mkdir()
+    output_dir = tmp_path / "site"
+
+    (benchmarks_dir / "test.yaml").write_text(yaml.dump(VALID_DATA))
+    benchmarks = load_benchmarks(benchmarks_dir)
+    build_site(benchmarks, output_dir, PROJECT_ROOT)
+
+    index_html = (output_dir / "index.html").read_text()
+    assert "Obfuscated PRF for 110 input bits" in index_html
+    assert "Witness encryption for 64 witness bits" in index_html
+    assert index_html.count('<button type="button" class="target-tab') == 2
+    assert index_html.count('class="target-panel"') == 2
+    # The second (non-default) target panel starts hidden.
+    assert 'data-target="witness-encryption-64" role="tabpanel" hidden' in index_html
+    # The entry has no explicit target, so it lands on the default target
+    # and the second panel shows the empty state.
+    assert "No benchmark entries yet" in index_html
+
+
+def test_benchmark_assigned_to_explicit_target(tmp_path):
+    benchmarks_dir = tmp_path / "benchmarks"
+    benchmarks_dir.mkdir()
+    output_dir = tmp_path / "site"
+
+    data = {**VALID_DATA, "target": "witness-encryption-64"}
+    (benchmarks_dir / "test.yaml").write_text(yaml.dump(data))
+    benchmarks = load_benchmarks(benchmarks_dir)
+    build_site(benchmarks, output_dir, PROJECT_ROOT)
+
+    bj = json.loads((output_dir / "benchmarks.json").read_text())
+    assert bj[0]["target"] == "witness-encryption-64"
+
+    # Default target panel is now the empty one.
+    index_html = (output_dir / "index.html").read_text()
+    assert "No benchmark entries yet" in index_html
+
+    # Detail page names the target.
+    detail_html = (
+        output_dir / "implementations" / "test-implementation" / "index.html"
+    ).read_text()
+    assert "Witness encryption for 64 witness bits" in detail_html
+
+
+def test_build_rejects_unknown_target(tmp_path):
+    benchmarks_dir = tmp_path / "benchmarks"
+    benchmarks_dir.mkdir()
+    output_dir = tmp_path / "site"
+
+    data = {**VALID_DATA, "target": "no-such-target"}
+    (benchmarks_dir / "test.yaml").write_text(yaml.dump(data))
+    benchmarks = load_benchmarks(benchmarks_dir)
+
+    with pytest.raises(ValueError, match="unknown target"):
+        build_site(benchmarks, output_dir, PROJECT_ROOT)

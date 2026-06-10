@@ -11,11 +11,19 @@ from pydantic import ValidationError
 from .models import Benchmark
 
 
-def load_benchmarks(benchmarks_dir: Path) -> list[Benchmark]:
+def load_benchmarks(
+    benchmarks_dir: Path,
+    *,
+    allowed_targets: list[str] | None = None,
+    default_target: str | None = None,
+) -> list[Benchmark]:
     """Load all YAML files from the benchmarks directory.
 
     Returns validated Benchmark objects sorted by id for deterministic output.
     Prints contributor-friendly errors and exits on failure.
+
+    When ``allowed_targets`` is given, each entry's ``target`` must be one of
+    those ids; entries without a ``target`` are assigned ``default_target``.
     """
     if not benchmarks_dir.is_dir():
         print(f"Error: benchmarks directory not found: {benchmarks_dir}")
@@ -47,11 +55,21 @@ def load_benchmarks(benchmarks_dir: Path) -> list[Benchmark]:
 
         try:
             bm = Benchmark(**data)
-            benchmarks.append(bm)
         except ValidationError as e:
             for err in e.errors():
                 loc = " -> ".join(str(l) for l in err["loc"])
                 errors.append(f"{path}: {loc}: {err['msg']}")
+            continue
+
+        if bm.target is None:
+            bm.target = default_target
+        if allowed_targets is not None and bm.target is not None and bm.target not in allowed_targets:
+            errors.append(
+                f"{path}: target: unknown target '{bm.target}' "
+                f"(valid targets: {', '.join(allowed_targets)})"
+            )
+            continue
+        benchmarks.append(bm)
 
     # Check for duplicate ids
     seen_ids: dict[str, str] = {}

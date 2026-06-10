@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-from .build import build_site
+from .build import build_site, load_site_config, load_targets
 from .load import load_benchmarks
 from .models import generate_json_schema
 
@@ -21,13 +21,23 @@ def find_project_root() -> Path:
     return Path.cwd()
 
 
-def cmd_validate(args: argparse.Namespace) -> None:
-    project_root = find_project_root()
+def _load_validated_benchmarks(project_root: Path) -> list:
     benchmarks_dir = project_root / "benchmarks"
+    config = load_site_config(project_root / "config" / "site.yaml")
+    targets = load_targets(config)
+    target_ids = [t["id"] for t in targets]
 
     print(f"Validating benchmarks in {benchmarks_dir}/ ...")
-    benchmarks = load_benchmarks(benchmarks_dir)
+    benchmarks = load_benchmarks(
+        benchmarks_dir, allowed_targets=target_ids, default_target=target_ids[0]
+    )
     print(f"OK: {len(benchmarks)} benchmark(s) validated.")
+    return benchmarks
+
+
+def cmd_validate(args: argparse.Namespace) -> None:
+    project_root = find_project_root()
+    _load_validated_benchmarks(project_root)
 
     # Generate / refresh JSON schema
     schema_path = project_root / "schema" / "benchmark.schema.json"
@@ -39,13 +49,9 @@ def cmd_validate(args: argparse.Namespace) -> None:
 
 def cmd_build(args: argparse.Namespace) -> None:
     project_root = find_project_root()
-    benchmarks_dir = project_root / "benchmarks"
     output_dir = Path(args.output).resolve()
 
-    print(f"Validating benchmarks in {benchmarks_dir}/ ...")
-    benchmarks = load_benchmarks(benchmarks_dir)
-    print(f"OK: {len(benchmarks)} benchmark(s) validated.")
-
+    benchmarks = _load_validated_benchmarks(project_root)
     build_site(benchmarks, output_dir, project_root)
 
 
