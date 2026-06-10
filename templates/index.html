@@ -26,12 +26,13 @@
                 <button type="button" class="chart-tab" role="tab" data-chart="2">Eval. total time vs circuit size</button>
                 <button type="button" class="chart-tab" role="tab" data-chart="3">Eval. latency vs date</button>
                 <button type="button" class="chart-tab" role="tab" data-chart="4">Obf. latency vs date</button>
-                <button type="button" class="chart-reset" title="Reset zoom">Reset zoom</button>
+                <button type="button" class="chart-action chart-fit" title="Zoom to the benchmark data points">Fit to data</button>
+                <button type="button" class="chart-action chart-reset" title="Reset zoom">Reset zoom</button>
             </div>
             <div class="chart-canvas-wrap">
                 <canvas class="chart-canvas" aria-label="Benchmark trend chart for {{ t.name }}" role="img"></canvas>
             </div>
-            <p class="chart-hint">Scroll or pinch to zoom, drag to pan, double-click to reset.</p>
+            <p class="chart-hint">Drag to zoom into a region, scroll or pinch to zoom, Shift+drag to pan, double-click to reset.</p>
         </section>
         <script class="benchmark-data" type="application/json">{{ t.chart_data | tojson }}</script>
 

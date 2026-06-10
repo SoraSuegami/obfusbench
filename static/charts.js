@@ -167,8 +167,10 @@
         if (!Array.isArray(data) || data.length === 0) return;
 
         var chart = null;
+        var activeSpec = 0;
 
         function render(specIndex) {
+            activeSpec = specIndex;
             var spec = SPECS[specIndex];
             var points = data.map(function (b) {
                 var p = spec.point(b);
@@ -249,18 +251,26 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    // No entry animation: programmatic zooms (fit-to-data)
+                    // race against the animator and end up with stale
+                    // element positions.
+                    animation: false,
                     plugins: {
                         legend: { display: false },
                         goalLine: yGoal != null
                             ? { x: spec.goalX, y: yGoal, pad: goalPad, label: spec.goalLabel }
                             : { y: null },
                         zoom: {
-                            limits: {
-                                x: { min: "original", max: "original" },
-                                y: { min: "original", max: "original" },
-                            },
-                            pan: { enabled: true, mode: "xy" },
+                            // Plain drag draws a selection box to zoom into,
+                            // so pan needs a modifier key.
+                            pan: { enabled: true, mode: "xy", modifierKey: "shift" },
                             zoom: {
+                                drag: {
+                                    enabled: true,
+                                    backgroundColor: "rgba(37, 99, 235, 0.15)",
+                                    borderColor: "#2563eb",
+                                    borderWidth: 1,
+                                },
                                 wheel: { enabled: true },
                                 pinch: { enabled: true },
                                 mode: "xy",
@@ -303,8 +313,52 @@
         function resetZoom() {
             if (chart && typeof chart.resetZoom === "function") chart.resetZoom();
         }
+
+        // Pad a data bounding box so the points don't sit on the chart edge.
+        // Log axes get a fixed multiplicative margin; linear axes a relative
+        // one, with a fallback window when all points share one value.
+        function paddedRange(min, max, isLog, isDate) {
+            if (isLog) {
+                return { min: Math.max(min / 3, Number.MIN_VALUE), max: max * 3 };
+            }
+            var pad = (max - min) * 0.08;
+            if (pad === 0) {
+                pad = isDate ? 30 * 24 * 3600 * 1000 : Math.max(Math.abs(max) * 0.1, 1);
+            }
+            return { min: min - pad, max: max + pad };
+        }
+
+        // Zoom straight to the bounding box of the plotted benchmarks,
+        // leaving the goal line out of view if it is far away.
+        function fitToData() {
+            if (!chart || typeof chart.zoomScale !== "function") return;
+            var pts = chart.data.datasets[0].data;
+            if (!pts.length) return;
+            var xmin = Infinity, xmax = -Infinity, ymin = Infinity, ymax = -Infinity;
+            pts.forEach(function (p) {
+                if (p.x < xmin) xmin = p.x;
+                if (p.x > xmax) xmax = p.x;
+                if (p.y < ymin) ymin = p.y;
+                if (p.y > ymax) ymax = p.y;
+            });
+            var spec = SPECS[activeSpec];
+            var scales = chart.options.scales;
+            chart.zoomScale(
+                "x",
+                paddedRange(xmin, xmax, scales.x.type === "logarithmic", spec.xIsDate),
+                "none"
+            );
+            chart.zoomScale(
+                "y",
+                paddedRange(ymin, ymax, scales.y.type === "logarithmic", false),
+                "none"
+            );
+        }
+
         var resetBtn = panel.querySelector(".chart-reset");
         if (resetBtn) resetBtn.addEventListener("click", resetZoom);
+        var fitBtn = panel.querySelector(".chart-fit");
+        if (fitBtn) fitBtn.addEventListener("click", fitToData);
         canvas.addEventListener("dblclick", resetZoom);
 
         var tabs = panel.querySelectorAll(".chart-tab");
