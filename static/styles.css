@@ -457,6 +457,14 @@ tbody tr:hover {
     width: 100%;
 }
 
+.chart-canvas {
+    cursor: grab;
+}
+
+.chart-canvas:active {
+    cursor: grabbing;
+}
+
 .chart-hint {
     margin: 0.4rem 0 0;
     font-size: 0.8rem;

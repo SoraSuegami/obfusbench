@@ -261,16 +261,10 @@
                             ? { x: spec.goalX, y: yGoal, pad: goalPad, label: spec.goalLabel }
                             : { y: null },
                         zoom: {
-                            // Plain drag draws a selection box to zoom into,
-                            // so pan needs a modifier key.
-                            pan: { enabled: true, mode: "xy", modifierKey: "shift" },
+                            // Map-style navigation: drag to pan, wheel/pinch
+                            // to zoom around the cursor.
+                            pan: { enabled: true, mode: "xy" },
                             zoom: {
-                                drag: {
-                                    enabled: true,
-                                    backgroundColor: "rgba(37, 99, 235, 0.15)",
-                                    borderColor: "#2563eb",
-                                    borderWidth: 1,
-                                },
                                 wheel: { enabled: true },
                                 pinch: { enabled: true },
                                 mode: "xy",
