@@ -88,6 +88,10 @@
             var ctx = chart.ctx;
 
             ctx.save();
+            // Keep the goal line inside the plot area while zooming/panning.
+            ctx.beginPath();
+            ctx.rect(area.left, area.top, area.right - area.left, area.bottom - area.top);
+            ctx.clip();
             ctx.strokeStyle = "#16a34a";
             ctx.lineWidth = 2;
             ctx.setLineDash([8, 5]);
@@ -96,20 +100,26 @@
 
             var y = chart.scales.y.getPixelForValue(opts.y);
             if (opts.x != null) {
-                // Diagonal: from (goal x, bottom axis) up to (left axis, goal y).
-                var x = chart.scales.x.getPixelForValue(opts.x);
-                if (isFinite(x) && isFinite(y)) {
+                // Diagonal between the points where the goal values meet the
+                // (unzoomed) axes. Anchoring to data coordinates keeps the
+                // line in place while the user zooms or pans.
+                var pad = opts.pad || 100;
+                var x0 = chart.scales.x.getPixelForValue(opts.x);
+                var y0 = chart.scales.y.getPixelForValue(opts.y / pad);
+                var x1 = chart.scales.x.getPixelForValue(opts.x / pad);
+                var y1 = chart.scales.y.getPixelForValue(opts.y);
+                if (isFinite(x0) && isFinite(y0) && isFinite(x1) && isFinite(y1)) {
                     ctx.beginPath();
-                    ctx.moveTo(x, area.bottom);
-                    ctx.lineTo(area.left, y);
+                    ctx.moveTo(x0, y0);
+                    ctx.lineTo(x1, y1);
                     ctx.stroke();
                     ctx.setLineDash([]);
                     ctx.textAlign = "left";
                     ctx.textBaseline = "middle";
                     ctx.fillText(
                         opts.label,
-                        (area.left + x) / 2 + 10,
-                        (y + area.bottom) / 2 - 10
+                        (x0 + x1) / 2 + 10,
+                        (y0 + y1) / 2 - 10
                     );
                 }
             } else if (isFinite(y) && y >= area.top && y <= area.bottom) {
@@ -126,6 +136,12 @@
         },
     };
     Chart.register(goalLinePlugin);
+
+    // chartjs-plugin-zoom auto-registers from its UMD bundle; this is a
+    // harmless safety net in case a future build stops doing so.
+    if (typeof window !== "undefined" && window.ChartZoom) {
+        Chart.register(window.ChartZoom);
+    }
 
     // Label only powers of ten on logarithmic axes (e.g. "1e+38").
     function logTickLabel(value) {
@@ -236,8 +252,20 @@
                     plugins: {
                         legend: { display: false },
                         goalLine: yGoal != null
-                            ? { x: spec.goalX, y: yGoal, label: spec.goalLabel }
+                            ? { x: spec.goalX, y: yGoal, pad: goalPad, label: spec.goalLabel }
                             : { y: null },
+                        zoom: {
+                            limits: {
+                                x: { min: "original", max: "original" },
+                                y: { min: "original", max: "original" },
+                            },
+                            pan: { enabled: true, mode: "xy" },
+                            zoom: {
+                                wheel: { enabled: true },
+                                pinch: { enabled: true },
+                                mode: "xy",
+                            },
+                        },
                         tooltip: {
                             callbacks: {
                                 label: function (ctx) {
@@ -271,6 +299,13 @@
             if (chart) chart.destroy();
             chart = new Chart(canvas, config);
         }
+
+        function resetZoom() {
+            if (chart && typeof chart.resetZoom === "function") chart.resetZoom();
+        }
+        var resetBtn = panel.querySelector(".chart-reset");
+        if (resetBtn) resetBtn.addEventListener("click", resetZoom);
+        canvas.addEventListener("dblclick", resetZoom);
 
         var tabs = panel.querySelectorAll(".chart-tab");
         tabs.forEach(function (tab) {

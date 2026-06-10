@@ -26,10 +26,12 @@
                 <button type="button" class="chart-tab" role="tab" data-chart="2">Eval. total time vs circuit size</button>
                 <button type="button" class="chart-tab" role="tab" data-chart="3">Eval. latency vs date</button>
                 <button type="button" class="chart-tab" role="tab" data-chart="4">Obf. latency vs date</button>
+                <button type="button" class="chart-reset" title="Reset zoom">Reset zoom</button>
             </div>
             <div class="chart-canvas-wrap">
                 <canvas class="chart-canvas" aria-label="Benchmark trend chart for {{ t.name }}" role="img"></canvas>
             </div>
+            <p class="chart-hint">Scroll or pinch to zoom, drag to pan, double-click to reset.</p>
         </section>
         <script class="benchmark-data" type="application/json">{{ t.chart_data | tojson }}</script>
 
@@ -93,6 +95,8 @@
 <script src="{{ base_url }}static/app.js"></script>
 {% if total_count %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.min.js"></script>
 <script src="{{ base_url }}static/charts.js"></script>
 {% endif %}
 {% endblock %}

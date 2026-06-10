@@ -430,10 +430,34 @@ tbody tr:hover {
     color: #ffffff;
 }
 
+.chart-reset {
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    margin-left: auto;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-bg);
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.chart-reset:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
 .chart-canvas-wrap {
     position: relative;
     height: 380px;
     width: 100%;
+}
+
+.chart-hint {
+    margin: 0.4rem 0 0;
+    font-size: 0.8rem;
+    color: var(--color-muted);
 }
 
 /* 404 */
