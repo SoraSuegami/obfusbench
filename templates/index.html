@@ -26,10 +26,12 @@
                 <button type="button" class="chart-tab" role="tab" data-chart="2">Eval. total time vs obfuscation size</button>
                 <button type="button" class="chart-tab" role="tab" data-chart="3">Eval. latency vs date</button>
                 <button type="button" class="chart-tab" role="tab" data-chart="4">Obf. latency vs date</button>
-                <button type="button" class="chart-action chart-fit" title="Zoom to the benchmark data points">Fit to data</button>
-                <button type="button" class="chart-action chart-reset" title="Reset zoom">Reset zoom</button>
             </div>
             <div class="chart-canvas-wrap">
+                <div class="chart-controls" role="group" aria-label="Chart view controls">
+                    <button type="button" class="chart-action chart-fit" title="Zoom to the benchmark data points">⤢ Fit to data</button>
+                    <button type="button" class="chart-action chart-reset" title="Reset zoom">⟲ Reset zoom</button>
+                </div>
                 <canvas class="chart-canvas" aria-label="Benchmark trend chart for {{ t.name }}" role="img"></canvas>
             </div>
             <p class="chart-hint">Drag to pan, scroll or pinch to zoom, double-click to reset.</p>
