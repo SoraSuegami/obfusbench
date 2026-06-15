@@ -182,6 +182,11 @@ def build_site(
             )
         by_target[bm.target].append(bm)
 
+    # Default leaderboard order: ascending phase-1 (obfuscation) total time, so
+    # the server-rendered table is already smallest-first regardless of JS.
+    for tid in by_target:
+        by_target[tid].sort(key=lambda b: b.obfuscation_total_time_hours)
+
     def chart_entry(bm: Benchmark) -> dict:
         costs = costs_for(bm)
         return {
