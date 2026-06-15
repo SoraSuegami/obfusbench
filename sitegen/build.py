@@ -114,9 +114,10 @@ def build_site(
 ) -> None:
     """Generate the full static site.
 
-    ``prices`` maps a normalized device name to its USD/hour rate; when omitted
-    the committed fallback file is used (no network access). Cost is derived as
-    ``price * total_time_hours`` and is never read from the benchmark YAML.
+    ``prices`` maps a normalized GPU id to its USD/hour rate; when omitted, prices
+    are resolved without network access (``fetch=False``), so they are empty and
+    cost renders as ND. Cost is derived as ``price * total_time_hours`` and is
+    never read from the benchmark YAML.
     """
     project_root = project_root.resolve()
     output_dir = validate_output_dir(output_dir, project_root)

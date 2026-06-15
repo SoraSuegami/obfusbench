@@ -269,6 +269,9 @@
                     // race against the animator and end up with stale
                     // element positions.
                     animation: false,
+                    // Reserve a top band so the floating view controls
+                    // (top-right) never overlap plotted points or lines.
+                    layout: { padding: { top: 44 } },
                     plugins: {
                         legend: { display: false },
                         goalLine: yGoal != null

@@ -42,11 +42,28 @@ Thank you for contributing a benchmark entry! This guide explains how to submit 
 | `evaluation_total_time_hours` | float >= 0 | **yes** | Total evaluation wall-clock time in hours |
 | `evaluation_peak_memory_gb` | float >= 0 | no | Evaluation peak memory in GB; displayed as ND when omitted |
 
-> **Cost is not a field.** Obfuscation/evaluation cost is derived automatically as
-> the device's hourly price × total time. Hourly prices come from RunPod at build
-> time (with an offline fallback in `config/gpu_devices.yaml`). To get cost shown
-> for your entry, set `device` to a GPU id listed in `config/gpu_devices.yaml`;
-> add a new id there if yours is missing.
+### Cost is derived, not submitted
+
+Obfuscation and evaluation cost are **not** YAML fields. Each is computed as:
+
+```
+cost = device hourly price (USD) × total time (hours)
+```
+
+The hourly price comes from the **RunPod community-cloud price**, fetched live at
+build time. The `device` field is a short GPU id (e.g. `H200`) that
+`config/gpu_devices.yaml` maps to a specific RunPod GPU type.
+
+- To get cost displayed for your entry, set `device` to an id listed in
+  `config/gpu_devices.yaml`. If your GPU is missing, add a new id there (map it to
+  the matching RunPod GPU type name).
+- Bare model names like `H100` are ambiguous on RunPod (SXM / NVL / PCIe); the
+  registry pins one variant per id — add a more specific id if you need another.
+- If the live price can't be fetched, or `device` is unset/unknown, cost shows as
+  **ND**. There is no committed fallback price.
+
+Cost appears in the leaderboard table (under the total-time columns) and in the
+tooltips of the total-time trend charts.
 
 ## File naming conventions
 
