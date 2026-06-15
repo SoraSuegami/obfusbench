@@ -230,8 +230,20 @@
                     .sort(function (a, b) { return a.x - b.x; });
             }
 
+            // Date axis: label whole days only, and never repeat a day. Ticks
+            // whose day matches the previous tick's day are dropped, so the
+            // smallest visible label unit is one day.
             var xTicks = spec.xIsDate
-                ? { callback: function (v) { return tsToLabel(v); } }
+                ? {
+                    callback: function (value, index, ticks) {
+                        var label = tsToLabel(value);
+                        if (index > 0 && ticks[index - 1] &&
+                            tsToLabel(ticks[index - 1].value) === label) {
+                            return null;
+                        }
+                        return label;
+                    },
+                }
                 : {};
 
             // Goal charts use log axes so the goal line and the (much
