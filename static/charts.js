@@ -230,6 +230,12 @@
                     .sort(function (a, b) { return a.x - b.x; });
             }
 
+            // Place date-axis ticks exactly on the plotted dates (midnight UTC)
+            // so each point sits on its own gridline/label.
+            var dateTickValues = spec.xIsDate
+                ? points.map(function (p) { return p.x; })
+                : [];
+
             // Date axis: label whole days only, and never repeat a day. Ticks
             // whose day matches the previous tick's day are dropped, so the
             // smallest visible label unit is one day.
@@ -276,6 +282,17 @@
                     type: "linear",
                     title: { display: true, text: spec.xTitle },
                     ticks: xTicks,
+                    // Force ticks onto the actual data dates (within the current
+                    // zoom range) so points land exactly on their gridlines.
+                    afterBuildTicks: spec.xIsDate
+                        ? function (scale) {
+                            scale.ticks = dateTickValues
+                                .filter(function (v) {
+                                    return v >= scale.min && v <= scale.max;
+                                })
+                                .map(function (v) { return { value: v }; });
+                        }
+                        : undefined,
                 };
 
             var config = {
