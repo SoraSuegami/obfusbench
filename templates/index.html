@@ -63,6 +63,7 @@
                         <th data-sort="id" aria-sort="none">Implementation</th>
                         <th data-sort="authors" aria-sort="none">Authors</th>
                         <th data-sort="developers" aria-sort="none">Developers</th>
+                        <th data-sort="device" aria-sort="none">Device</th>
                         {% for m in t.metric_fields %}
                         <th data-sort="{{ m.key }}" aria-sort="none" class="numeric">
                             {{ m.label }}
@@ -78,6 +79,7 @@
                         <td><a href="{{ base_url }}implementations/{{ bm.slug }}/">{{ bm.id }}</a></td>
                         <td>{{ bm.authors | join(", ") }}</td>
                         <td>{{ bm.developers | join(", ") }}</td>
+                        <td>{{ t.device_by_slug[bm.slug] if t.device_by_slug[bm.slug] is not none else "ND" }}</td>
                         {% for m in t.metric_fields %}
                         <td class="numeric" data-value="{% if bm[m.key] is not none %}{{ bm[m.key] }}{% endif %}">{{ bm[m.key] | format_sci }}{% if m.key in bm_costs and bm.device %}<br><span class="cell-cost">({% if bm_costs[m.key] is not none %}${{ bm_costs[m.key] | format_sci }}{% else %}ND{% endif %})</span>{% endif %}</td>
                         {% endfor %}

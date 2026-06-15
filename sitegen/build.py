@@ -10,7 +10,7 @@ import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from .models import DEFAULT_LABELS, Benchmark, metric_fields
-from .pricing import price_for_device, resolve_prices
+from .pricing import device_display, load_gpu_registry, price_for_device, resolve_prices
 from .utils import commit_url, format_number, format_sci
 
 # Total-time metrics whose cells also show derived cost (price x total time).
@@ -141,6 +141,8 @@ def build_site(
     if prices is None:
         prices, _ = resolve_prices(project_root, fetch=False)
 
+    registry = load_gpu_registry(project_root)
+
     def costs_for(bm: Benchmark) -> dict[str, float | None]:
         rate = price_for_device(prices, bm.device)
         return {
@@ -208,6 +210,9 @@ def build_site(
             "benchmarks": by_target[t["id"]],
             "chart_data": [chart_entry(bm) for bm in by_target[t["id"]]],
             "costs_by_slug": {bm.slug: costs_for(bm) for bm in by_target[t["id"]]},
+            "device_by_slug": {
+                bm.slug: device_display(registry, bm.device) for bm in by_target[t["id"]]
+            },
         }
         for t in targets
     ]
@@ -236,6 +241,7 @@ def build_site(
             commit_link=commit_url(bm.url, bm.commit),
             obfuscation_cost_usd=costs["obfuscation_total_time_hours"],
             evaluation_cost_usd=costs["evaluation_total_time_hours"],
+            device_label=device_display(registry, bm.device),
             device_hourly_price_usd=price_for_device(prices, bm.device),
         )
         (page_dir / "index.html").write_text(detail_html)
@@ -254,6 +260,7 @@ def build_site(
         entry.pop("slug", None)
         costs = costs_for(bm)
         # Cost is derived, not stored: price x total time.
+        entry["device_display"] = device_display(registry, bm.device)
         entry["device_hourly_price_usd"] = price_for_device(prices, bm.device)
         entry["obfuscation_cost_usd"] = costs["obfuscation_total_time_hours"]
         entry["evaluation_cost_usd"] = costs["evaluation_total_time_hours"]

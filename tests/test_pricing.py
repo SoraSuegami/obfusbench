@@ -21,8 +21,21 @@ def test_normalize_key_is_case_and_space_insensitive():
 
 def test_registry_maps_short_ids_to_runpod_names():
     registry = load_gpu_registry(PROJECT_ROOT)
-    assert registry["h100"] == "NVIDIA H100 80GB HBM3"
-    assert registry["h200"] == "NVIDIA H200"
+    assert registry["h100"]["runpod_name"] == "NVIDIA H100 80GB HBM3"
+    assert registry["h200"]["runpod_name"] == "NVIDIA H200"
+    # display defaults to a normalized name, not the raw id.
+    assert registry["h200"]["display"] == "H200 SXM"
+
+
+def test_device_display_normalizes_id():
+    from sitegen.pricing import device_display
+
+    registry = load_gpu_registry(PROJECT_ROOT)
+    assert device_display(registry, "H200") == "H200 SXM"
+    assert device_display(registry, "rtxpro6000") == "RTX PRO 6000"
+    assert device_display(registry, None) is None
+    # Unknown id falls back to the raw value so it stays visible.
+    assert device_display(registry, "mystery-gpu") == "mystery-gpu"
 
 
 def test_offline_resolve_yields_no_prices():

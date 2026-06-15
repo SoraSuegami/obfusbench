@@ -18,9 +18,9 @@
             <dd>{{ benchmark.developers | join(", ") }}</dd>
             <dt>Date</dt>
             <dd>{{ benchmark.date.isoformat() }}</dd>
-            {% if benchmark.device %}
+            {% if device_label %}
             <dt>Device</dt>
-            <dd>{{ benchmark.device }}{% if device_hourly_price_usd is not none %} (${{ device_hourly_price_usd | format_number }}/h){% endif %}</dd>
+            <dd>{{ device_label }}{% if device_hourly_price_usd is not none %} (${{ device_hourly_price_usd | format_number }}/h){% endif %}</dd>
             {% endif %}
             {% if benchmark.url %}
             <dt>URL</dt>

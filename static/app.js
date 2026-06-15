@@ -146,9 +146,10 @@
         var tbody = table.querySelector("tbody");
         var headers = thead.querySelectorAll("th[data-sort]");
 
-        // Read initial sort from URL
+        // Read initial sort from URL; default to ascending phase-1 total time
+        // ("Obf. total time" column) when no sort is specified.
         var params = new URLSearchParams(window.location.search);
-        var currentSort = params.get("sort") || null;
+        var currentSort = params.get("sort") || "obfuscation_total_time_hours";
         // Sorting is always ascending (smaller values first).
         var currentDir = "asc";
 

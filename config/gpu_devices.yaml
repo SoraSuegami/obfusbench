@@ -1,9 +1,10 @@
 # GPU registry.
 #
 # Each benchmark's `device:` field uses the short GPU id (the key below, e.g.
-# "H200"). Matching is case-insensitive. Each id maps to a RunPod GPU type id
-# (`runpod_name`), used to look up the live hourly price from the RunPod API at
-# build time.
+# "H200"). Matching is case-insensitive. Each id maps to:
+#   - runpod_name: the RunPod GPU type id, used to look up the live hourly price.
+#   - display: the normalized name shown in the UI (the leaderboard Device column
+#     and detail page). Benchmarks never display the raw `device` token.
 #
 # Cost is always derived (live hourly price x total time); it is never stored in
 # benchmarks. If the live price cannot be fetched, cost is shown as ND -- there
@@ -12,19 +13,19 @@
 # Note: bare model names like "H100" are ambiguous on RunPod (SXM / NVL / PCIe).
 # Each id below pins one specific variant; add a more specific id if you need a
 # different one (e.g. H100-PCIE -> "NVIDIA H100 PCIe").
-H100: { runpod_name: "NVIDIA H100 80GB HBM3" }      # H100 SXM
-H100-NVL: { runpod_name: "NVIDIA H100 NVL" }
-H100-PCIE: { runpod_name: "NVIDIA H100 PCIe" }
-H200: { runpod_name: "NVIDIA H200" }                # H200 SXM
-H200-NVL: { runpod_name: "NVIDIA H200 NVL" }
-B200: { runpod_name: "NVIDIA B200" }
-B300: { runpod_name: "NVIDIA B300 SXM6 AC" }
-A100: { runpod_name: "NVIDIA A100 80GB PCIe" }
-A100-SXM: { runpod_name: "NVIDIA A100-SXM4-80GB" }
-A40: { runpod_name: "NVIDIA A40" }
-L40S: { runpod_name: "NVIDIA L40S" }
-RTX4090: { runpod_name: "NVIDIA GeForce RTX 4090" }
-RTX5090: { runpod_name: "NVIDIA GeForce RTX 5090" }
-A6000: { runpod_name: "NVIDIA RTX A6000" }
-RTXPRO6000: { runpod_name: "NVIDIA RTX PRO 6000 Blackwell Server Edition" }
-MI300X: { runpod_name: "AMD Instinct MI300X OAM" }
+H100: { runpod_name: "NVIDIA H100 80GB HBM3", display: "H100 SXM" }
+H100-NVL: { runpod_name: "NVIDIA H100 NVL", display: "H100 NVL" }
+H100-PCIE: { runpod_name: "NVIDIA H100 PCIe", display: "H100 PCIe" }
+H200: { runpod_name: "NVIDIA H200", display: "H200 SXM" }
+H200-NVL: { runpod_name: "NVIDIA H200 NVL", display: "H200 NVL" }
+B200: { runpod_name: "NVIDIA B200", display: "B200" }
+B300: { runpod_name: "NVIDIA B300 SXM6 AC", display: "B300" }
+A100: { runpod_name: "NVIDIA A100 80GB PCIe", display: "A100 PCIe" }
+A100-SXM: { runpod_name: "NVIDIA A100-SXM4-80GB", display: "A100 SXM" }
+A40: { runpod_name: "NVIDIA A40", display: "A40" }
+L40S: { runpod_name: "NVIDIA L40S", display: "L40S" }
+RTX4090: { runpod_name: "NVIDIA GeForce RTX 4090", display: "RTX 4090" }
+RTX5090: { runpod_name: "NVIDIA GeForce RTX 5090", display: "RTX 5090" }
+A6000: { runpod_name: "NVIDIA RTX A6000", display: "RTX A6000" }
+RTXPRO6000: { runpod_name: "NVIDIA RTX PRO 6000 Blackwell Server Edition", display: "RTX PRO 6000" }
+MI300X: { runpod_name: "AMD Instinct MI300X OAM", display: "MI300X" }

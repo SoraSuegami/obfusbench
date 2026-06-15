@@ -84,8 +84,13 @@ def fetch_runpod_prices(timeout: float = 10.0) -> dict[str, float]:
     return prices
 
 
-def load_gpu_registry(project_root: Path) -> dict[str, str]:
-    """Load the GPU registry: normalized short GPU id -> RunPod GPU type id."""
+def load_gpu_registry(project_root: Path) -> dict[str, dict]:
+    """Load the GPU registry, keyed by normalized short GPU id.
+
+    Each value is ``{"runpod_name": <RunPod GPU type id>, "display": <name>}``.
+    ``display`` is the canonical name shown in the UI; it falls back to
+    ``runpod_name`` when not given.
+    """
     path = project_root / GPU_REGISTRY_FILE
     if not path.is_file():
         return {}
@@ -96,14 +101,30 @@ def load_gpu_registry(project_root: Path) -> dict[str, str]:
     if not isinstance(raw, dict):
         return {}
 
-    registry: dict[str, str] = {}
+    registry: dict[str, dict] = {}
     for gid, entry in raw.items():
         if not isinstance(entry, dict):
             continue
         runpod_name = str(entry.get("runpod_name", "")).strip()
-        if runpod_name:
-            registry[normalize_key(gid)] = runpod_name
+        if not runpod_name:
+            continue
+        display = str(entry.get("display", "")).strip() or runpod_name
+        registry[normalize_key(gid)] = {"runpod_name": runpod_name, "display": display}
     return registry
+
+
+def device_display(registry: dict[str, dict], device: str | None) -> str | None:
+    """Normalized display name for a device id (never the raw YAML token).
+
+    Returns None when no device is set; falls back to the raw value only for an
+    id that is absent from the registry (so it is still visible).
+    """
+    if not device:
+        return None
+    entry = registry.get(normalize_key(device))
+    if entry:
+        return entry["display"]
+    return device
 
 
 def resolve_prices(project_root: Path, *, fetch: bool = True) -> tuple[dict[str, float], str]:
@@ -120,8 +141,8 @@ def resolve_prices(project_root: Path, *, fetch: bool = True) -> tuple[dict[str,
         return {}, "none (live fetch unavailable)" if fetch else "none (fetch disabled)"
 
     prices: dict[str, float] = {}
-    for gid, runpod_name in registry.items():
-        price = live.get(normalize_key(runpod_name))
+    for gid, entry in registry.items():
+        price = live.get(normalize_key(entry["runpod_name"]))
         if price is not None:
             prices[gid] = price
     return prices, "RunPod API"
