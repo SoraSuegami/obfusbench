@@ -1,0 +1,13 @@
+id: "Diamond WE 1"
+authors: "Sora Suegami, Enrico Bottazzi, and Gayeong Park"
+developers: "Sora Suegami"
+url: "https://github.com/MachinaIO/mxx"
+commit: "c497114"
+date: "2026-06-15"
+target: "witness-encryption-64"
+device: "RTXPRO6000"
+encryption_latency_sec: 4.75e0
+encryption_total_time_hours: 1.27e3
+ciphertext_size_gb: 1.62e6
+decryption_latency_sec: 2.38e0
+decryption_total_time_hours: 1.53e0

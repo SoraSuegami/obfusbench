@@ -26,65 +26,78 @@
         return Number(v).toExponential(2);
     }
 
-    // Each spec maps a benchmark to an {x, y} point plus axis metadata.
-    // "goal" draws a horizontal line marking the ideal target value; those
-    // charts use a logarithmic y-axis so the goal stays visible next to
-    // astronomically larger measurements.
-    var SPECS = [
-        {
-            xTitle: "Date",
-            yTitle: "Evaluation total time (hours)",
-            xIsDate: true,
-            goal: 1,
-            goalLabel: "Goal: 1 hour",
-            // Derived cost shown in the tooltip (total-time charts only).
-            costKey: "evaluation_cost_usd",
-            point: function (b) {
-                return { x: dateToTs(b.date), y: b.evaluation_total_time_hours };
+    // Per-target display labels (renames the two phases / size); fields keys are
+    // shared across targets so only the text differs.
+    var DEFAULT_LABELS = {
+        phase1_short: "Obf.",
+        phase1_full: "Obfuscation",
+        phase2_short: "Eval.",
+        phase2_full: "Evaluation",
+        size: "Obfuscation size",
+    };
+
+    // Each spec maps a benchmark to an {x, y} point plus axis metadata. Text is
+    // built from the target's labels; structure (point accessors, goals, axes)
+    // is identical for every target. "goal" draws a horizontal line marking the
+    // ideal target value; those charts use a logarithmic y-axis so the goal
+    // stays visible next to astronomically larger measurements.
+    function buildSpecs(L) {
+        return [
+            {
+                xTitle: "Date",
+                yTitle: L.phase2_full + " total time (hours)",
+                xIsDate: true,
+                goal: 1,
+                goalLabel: "Goal: 1 hour",
+                // Derived cost shown in the tooltip (total-time charts only).
+                costKey: "evaluation_cost_usd",
+                point: function (b) {
+                    return { x: dateToTs(b.date), y: b.evaluation_total_time_hours };
+                },
             },
-        },
-        {
-            xTitle: "Date",
-            yTitle: "Obfuscation total time (hours)",
-            xIsDate: true,
-            goal: 1000,
-            goalLabel: "Goal: 1000 hours",
-            costKey: "obfuscation_cost_usd",
-            point: function (b) {
-                return { x: dateToTs(b.date), y: b.obfuscation_total_time_hours };
+            {
+                xTitle: "Date",
+                yTitle: L.phase1_full + " total time (hours)",
+                xIsDate: true,
+                goal: 1000,
+                goalLabel: "Goal: 1000 hours",
+                costKey: "obfuscation_cost_usd",
+                point: function (b) {
+                    return { x: dateToTs(b.date), y: b.obfuscation_total_time_hours };
+                },
             },
-        },
-        {
-            xTitle: "Obfuscation size (GB)",
-            yTitle: "Evaluation total time (hours)",
-            xIsDate: false,
-            // Diagonal goal line connecting 1000 GB on the x-axis with
-            // 1 hour on the y-axis.
-            goalX: 1000,
-            goalY: 1,
-            goalLabel: "Goal: 1000 GB, 1 hour",
-            costKey: "evaluation_cost_usd",
-            point: function (b) {
-                return { x: b.storage_gb, y: b.evaluation_total_time_hours };
+            {
+                xTitle: L.size + " (GB)",
+                yTitle: L.phase2_full + " total time (hours)",
+                xIsDate: false,
+                // Diagonal goal line connecting 1000 GB on the x-axis with
+                // 1 hour on the y-axis.
+                goalX: 1000,
+                goalY: 1,
+                goalLabel: "Goal: 1000 GB, 1 hour",
+                costKey: "evaluation_cost_usd",
+                point: function (b) {
+                    return { x: b.storage_gb, y: b.evaluation_total_time_hours };
+                },
             },
-        },
-        {
-            xTitle: "Date",
-            yTitle: "Evaluation latency (mins)",
-            xIsDate: true,
-            point: function (b) {
-                return { x: dateToTs(b.date), y: b.evaluation_latency_sec / 60 };
+            {
+                xTitle: "Date",
+                yTitle: L.phase2_full + " latency (mins)",
+                xIsDate: true,
+                point: function (b) {
+                    return { x: dateToTs(b.date), y: b.evaluation_latency_sec / 60 };
+                },
             },
-        },
-        {
-            xTitle: "Date",
-            yTitle: "Obfuscation latency (mins)",
-            xIsDate: true,
-            point: function (b) {
-                return { x: dateToTs(b.date), y: b.obfuscation_latency_sec / 60 };
+            {
+                xTitle: "Date",
+                yTitle: L.phase1_full + " latency (mins)",
+                xIsDate: true,
+                point: function (b) {
+                    return { x: dateToTs(b.date), y: b.obfuscation_latency_sec / 60 };
+                },
             },
-        },
-    ];
+        ];
+    }
 
     // Draws a dashed goal line: horizontal at y when only y is given, or
     // diagonal connecting x on the bottom axis with y on the left axis.
@@ -174,6 +187,18 @@
             return;
         }
         if (!Array.isArray(data) || data.length === 0) return;
+
+        // Per-target display labels drive the chart titles for this panel.
+        var labels = DEFAULT_LABELS;
+        var labelsEl = panel.querySelector(".chart-labels");
+        if (labelsEl) {
+            try {
+                labels = Object.assign({}, DEFAULT_LABELS, JSON.parse(labelsEl.textContent));
+            } catch (e) {
+                labels = DEFAULT_LABELS;
+            }
+        }
+        var SPECS = buildSpecs(labels);
 
         var chart = null;
         var activeSpec = 0;

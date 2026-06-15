@@ -29,9 +29,14 @@ def _load_validated_benchmarks(project_root: Path) -> list:
     targets = load_targets(config)
     target_ids = [t["id"] for t in targets]
 
+    target_labels = {t["id"]: t["labels"] for t in targets}
+
     print(f"Validating benchmarks in {benchmarks_dir}/ ...")
     benchmarks = load_benchmarks(
-        benchmarks_dir, allowed_targets=target_ids, default_target=target_ids[0]
+        benchmarks_dir,
+        allowed_targets=target_ids,
+        default_target=target_ids[0],
+        target_labels=target_labels,
     )
     print(f"OK: {len(benchmarks)} benchmark(s) validated.")
     return benchmarks

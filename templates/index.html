@@ -21,11 +21,9 @@
         <section class="charts">
             <h3>Trends</h3>
             <div class="chart-tabs" role="tablist" aria-label="Chart selection">
-                <button type="button" class="chart-tab is-active" role="tab" data-chart="0">Eval. total time vs date</button>
-                <button type="button" class="chart-tab" role="tab" data-chart="1">Obf. total time vs date</button>
-                <button type="button" class="chart-tab" role="tab" data-chart="2">Eval. total time vs obfuscation size</button>
-                <button type="button" class="chart-tab" role="tab" data-chart="3">Eval. latency vs date</button>
-                <button type="button" class="chart-tab" role="tab" data-chart="4">Obf. latency vs date</button>
+                {% for label in t.chart_tabs %}
+                <button type="button" class="chart-tab{% if loop.first %} is-active{% endif %}" role="tab" data-chart="{{ loop.index0 }}">{{ label }}</button>
+                {% endfor %}
             </div>
             <div class="chart-canvas-wrap">
                 <div class="chart-controls" role="group" aria-label="Chart view controls">
@@ -37,6 +35,7 @@
             <p class="chart-hint">Drag to pan, scroll or pinch to zoom, double-click to reset.</p>
         </section>
         <script class="benchmark-data" type="application/json">{{ t.chart_data | tojson }}</script>
+        <script class="chart-labels" type="application/json">{{ t.labels | tojson }}</script>
 
         {# Spotlight (Best Eval. Latency) disabled for now; re-enable by
            uncommenting this block and the matching code in static/app.js.
@@ -64,7 +63,7 @@
                         <th data-sort="id" aria-sort="none">Implementation</th>
                         <th data-sort="authors" aria-sort="none">Authors</th>
                         <th data-sort="developers" aria-sort="none">Developers</th>
-                        {% for m in metric_fields %}
+                        {% for m in t.metric_fields %}
                         <th data-sort="{{ m.key }}" aria-sort="none" class="numeric">
                             {{ m.label }}
                             <span class="unit">({{ m.unit }})</span>
@@ -79,7 +78,7 @@
                         <td><a href="{{ base_url }}implementations/{{ bm.slug }}/">{{ bm.id }}</a></td>
                         <td>{{ bm.authors | join(", ") }}</td>
                         <td>{{ bm.developers | join(", ") }}</td>
-                        {% for m in metric_fields %}
+                        {% for m in t.metric_fields %}
                         <td class="numeric" data-value="{% if bm[m.key] is not none %}{{ bm[m.key] }}{% endif %}">{{ bm[m.key] | format_sci }}{% if m.key in bm_costs and bm.device %}<br><span class="cell-cost">({% if bm_costs[m.key] is not none %}${{ bm_costs[m.key] | format_sci }}{% else %}ND{% endif %})</span>{% endif %}</td>
                         {% endfor %}
                     </tr>

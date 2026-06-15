@@ -4,9 +4,32 @@ site_description: "A public leaderboard for benchmarking iO implementations on a
 repository_url: "https://github.com/SoraSuegami/obfusbench"
 # Benchmark targets. The first entry is shown by default on the leaderboard;
 # benchmark YAML files reference a target by its id (omitted = first target).
+# Each target may define a `labels` block that renames the two phases and the
+# size metric for that target's screen (table columns, chart titles/tabs, and
+# detail page) AND the YAML field-name tokens contributors use (the *_key /
+# size_key entries). Internally every target maps to the same canonical fields;
+# omitted keys fall back to the obfuscation defaults.
 targets:
   - id: "obfuscated-prf-110"
     name: "Obfuscated PRF for 110 input bits"
+    labels:
+      phase1_short: "Obf."
+      phase1_full: "Obfuscation"
+      phase1_key: "obfuscation"
+      phase2_short: "Eval."
+      phase2_full: "Evaluation"
+      phase2_key: "evaluation"
+      size: "Obfuscation size"
+      size_key: "storage_gb"
   - id: "witness-encryption-64"
     name: "Witness encryption for 64 witness bits"
+    labels:
+      phase1_short: "Enc."
+      phase1_full: "Encryption"
+      phase1_key: "encryption"
+      phase2_short: "Dec."
+      phase2_full: "Decryption"
+      phase2_key: "decryption"
+      size: "Ciphertext size"
+      size_key: "ciphertext_size_gb"
 pages_base_url: "/obfusbench/"

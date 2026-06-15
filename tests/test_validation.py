@@ -211,6 +211,66 @@ def test_loader_fills_default_target(tmp_path):
     assert benchmarks[0].target == "obfuscated-prf-110"
 
 
+WE_LABELS = {
+    "phase1_key": "encryption",
+    "phase2_key": "decryption",
+    "size_key": "ciphertext_size_gb",
+}
+
+
+def _we_data():
+    """VALID_DATA re-keyed for the witness-encryption target."""
+    data = {**VALID_DATA, "target": "witness-encryption-64"}
+    for canonical, token in (
+        ("obfuscation_latency_sec", "encryption_latency_sec"),
+        ("obfuscation_total_time_hours", "encryption_total_time_hours"),
+        ("obfuscation_peak_memory_gb", "encryption_peak_memory_gb"),
+        ("storage_gb", "ciphertext_size_gb"),
+        ("evaluation_latency_sec", "decryption_latency_sec"),
+        ("evaluation_total_time_hours", "decryption_total_time_hours"),
+        ("evaluation_peak_memory_gb", "decryption_peak_memory_gb"),
+    ):
+        data[token] = data.pop(canonical)
+    return data
+
+
+def test_loader_translates_target_specific_keys(tmp_path):
+    """A target's YAML keys translate to canonical model fields."""
+    from sitegen.load import load_benchmarks
+
+    import yaml
+
+    (tmp_path / "we.yaml").write_text(yaml.dump(_we_data()))
+    benchmarks = load_benchmarks(
+        tmp_path,
+        allowed_targets=["witness-encryption-64"],
+        default_target="witness-encryption-64",
+        target_labels={"witness-encryption-64": WE_LABELS},
+    )
+    bm = benchmarks[0]
+    assert bm.obfuscation_latency_sec == VALID_DATA["obfuscation_latency_sec"]
+    assert bm.storage_gb == VALID_DATA["storage_gb"]
+    assert bm.evaluation_total_time_hours == VALID_DATA["evaluation_total_time_hours"]
+
+
+def test_loader_rejects_wrong_target_keys(tmp_path):
+    """Using another target's keys (canonical here) is rejected for WE."""
+    from sitegen.load import load_benchmarks
+
+    import yaml
+
+    # Canonical obfuscation keys are not valid for the witness-encryption target.
+    data = {**VALID_DATA, "target": "witness-encryption-64"}
+    (tmp_path / "bad.yaml").write_text(yaml.dump(data))
+    with pytest.raises(SystemExit):
+        load_benchmarks(
+            tmp_path,
+            allowed_targets=["witness-encryption-64"],
+            default_target="witness-encryption-64",
+            target_labels={"witness-encryption-64": WE_LABELS},
+        )
+
+
 def test_loader_rejects_unknown_target(tmp_path):
     from sitegen.load import load_benchmarks
 

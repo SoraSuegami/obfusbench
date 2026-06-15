@@ -26,4 +26,5 @@ L40S: { runpod_name: "NVIDIA L40S" }
 RTX4090: { runpod_name: "NVIDIA GeForce RTX 4090" }
 RTX5090: { runpod_name: "NVIDIA GeForce RTX 5090" }
 A6000: { runpod_name: "NVIDIA RTX A6000" }
+RTXPRO6000: { runpod_name: "NVIDIA RTX PRO 6000 Blackwell Server Edition" }
 MI300X: { runpod_name: "AMD Instinct MI300X OAM" }

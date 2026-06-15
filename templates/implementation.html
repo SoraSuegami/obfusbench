@@ -40,7 +40,7 @@
     </section>
 
     <section class="metrics-section">
-        <h3>Obfuscation</h3>
+        <h3>{{ labels.phase1_full }}</h3>
         <div class="metrics-grid">
             <div class="metric-card">
                 <span class="metric-label">Latency</span>
@@ -59,14 +59,14 @@
                 <span class="metric-value">{{ benchmark.obfuscation_peak_memory_gb | format_number }}{% if benchmark.obfuscation_peak_memory_gb is not none %} <span class="unit">GB</span>{% endif %}</span>
             </div>
             <div class="metric-card">
-                <span class="metric-label">Storage</span>
+                <span class="metric-label">{{ labels.size }}</span>
                 <span class="metric-value">{{ benchmark.storage_gb | format_number }} <span class="unit">GB</span></span>
             </div>
         </div>
     </section>
 
     <section class="metrics-section">
-        <h3>Evaluation</h3>
+        <h3>{{ labels.phase2_full }}</h3>
         <div class="metrics-grid">
             <div class="metric-card">
                 <span class="metric-label">Latency</span>

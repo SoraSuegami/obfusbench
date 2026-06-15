@@ -3,7 +3,7 @@ authors: "Shweta Agrawal, Simran Kumari, and Shota Yamada"
 developers: "Sora Suegami"
 url: "https://github.com/MachinaIO/mxx"
 commit: "c497114"
-date: "2025-04-03"
+date: "2026-06-14"
 target: "obfuscated-prf-110"
 device: "H200"
 obfuscation_latency_sec: 5.94e5

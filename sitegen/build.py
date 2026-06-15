@@ -9,12 +9,24 @@ from pathlib import Path
 import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from .models import METRIC_FIELDS, Benchmark
+from .models import DEFAULT_LABELS, Benchmark, metric_fields
 from .pricing import price_for_device, resolve_prices
 from .utils import commit_url, format_number, format_sci
 
 # Total-time metrics whose cells also show derived cost (price x total time).
 COST_METRIC_KEYS = ("obfuscation_total_time_hours", "evaluation_total_time_hours")
+
+
+def chart_tabs_for(labels: dict[str, str]) -> list[str]:
+    """Chart selector tab labels, in the order charts.js renders them."""
+    p1, p2, size = labels["phase1_short"], labels["phase2_short"], labels["size"]
+    return [
+        f"{p2} total time vs date",
+        f"{p1} total time vs date",
+        f"{p2} total time vs {size.lower()}",
+        f"{p2} latency vs date",
+        f"{p1} latency vs date",
+    ]
 
 
 PROTECTED_OUTPUT_DIRS = (
@@ -89,7 +101,10 @@ def load_targets(config: dict) -> list[dict]:
         if tid in seen:
             raise ValueError(f"duplicate target id '{tid}' in config/site.yaml")
         seen.add(tid)
-        targets.append({"id": tid, "name": str(entry["name"]).strip()})
+        # Labels rename the two phases / size for this target; missing keys fall
+        # back to the obfuscation defaults.
+        labels = {**DEFAULT_LABELS, **(entry.get("labels") or {})}
+        targets.append({"id": tid, "name": str(entry["name"]).strip(), "labels": labels})
     return targets
 
 
@@ -102,7 +117,6 @@ def create_jinja_env(templates_dir: Path) -> Environment:
     env.filters["format_number"] = format_number
     env.filters["format_sci"] = format_sci
     env.globals["commit_url"] = commit_url
-    env.globals["metric_fields"] = METRIC_FIELDS
     return env
 
 
@@ -188,6 +202,9 @@ def build_site(
         {
             "id": t["id"],
             "name": t["name"],
+            "labels": t["labels"],
+            "metric_fields": metric_fields(t["labels"]),
+            "chart_tabs": chart_tabs_for(t["labels"]),
             "benchmarks": by_target[t["id"]],
             "chart_data": [chart_entry(bm) for bm in by_target[t["id"]]],
             "costs_by_slug": {bm.slug: costs_for(bm) for bm in by_target[t["id"]]},
@@ -202,6 +219,7 @@ def build_site(
 
     # Build detail pages
     target_names = {t["id"]: t["name"] for t in targets}
+    target_labels = {t["id"]: t["labels"] for t in targets}
     impl_dir = output_dir / "implementations"
     detail_tpl = env.get_template("implementation.html")
     for bm in benchmarks:
@@ -212,6 +230,7 @@ def build_site(
         detail_html = detail_tpl.render(
             benchmark=bm,
             target_name=target_names[bm.target],
+            labels=target_labels[bm.target],
             base_url="../../",
             site=config,
             commit_link=commit_url(bm.url, bm.commit),

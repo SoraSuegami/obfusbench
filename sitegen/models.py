@@ -170,15 +170,66 @@ class Benchmark(BaseModel):
         return self
 
 
-# Leaderboard table columns, in display order. This is the table layout only;
-# it does not include every numeric field (see NUMERIC_METRIC_KEYS for schema).
-METRIC_FIELDS: list[dict[str, str]] = [
-    {"key": "obfuscation_total_time_hours", "label": "Obf. total time", "unit": "h"},
-    {"key": "evaluation_total_time_hours", "label": "Eval. total time", "unit": "h"},
-    {"key": "storage_gb", "label": "Obfuscation size", "unit": "GB"},
-    {"key": "obfuscation_latency_sec", "label": "Obf. latency", "unit": "sec"},
-    {"key": "evaluation_latency_sec", "label": "Eval. latency", "unit": "sec"},
-]
+# Default labels (obfuscation terminology). A target in config/site.yaml may
+# override any of these to rename the two phases / the size metric. The *_key
+# entries are the YAML field-name tokens for that target; the *_short/_full/size
+# entries are display text. Internally the model always uses the canonical
+# (obfuscation) field names — the loader translates a target's keys to canonical.
+DEFAULT_LABELS: dict[str, str] = {
+    "phase1_short": "Obf.",
+    "phase1_full": "Obfuscation",
+    "phase1_key": "obfuscation",
+    "phase2_short": "Eval.",
+    "phase2_full": "Evaluation",
+    "phase2_key": "evaluation",
+    "size": "Obfuscation size",
+    "size_key": "storage_gb",
+}
+
+# Canonical (internal) metric field names on the Benchmark model.
+CANONICAL_METRIC_KEYS: tuple[str, ...] = (
+    "obfuscation_latency_sec",
+    "obfuscation_total_time_hours",
+    "obfuscation_peak_memory_gb",
+    "storage_gb",
+    "evaluation_latency_sec",
+    "evaluation_total_time_hours",
+    "evaluation_peak_memory_gb",
+)
+
+
+def yaml_key_map(labels: dict[str, str] | None = None) -> dict[str, str]:
+    """Map a target's YAML metric key -> canonical model field name.
+
+    For the default (obfuscation) labels this is the identity map.
+    """
+    lbl = {**DEFAULT_LABELS, **(labels or {})}
+    p1, p2, size = lbl["phase1_key"], lbl["phase2_key"], lbl["size_key"]
+    return {
+        f"{p1}_latency_sec": "obfuscation_latency_sec",
+        f"{p1}_total_time_hours": "obfuscation_total_time_hours",
+        f"{p1}_peak_memory_gb": "obfuscation_peak_memory_gb",
+        size: "storage_gb",
+        f"{p2}_latency_sec": "evaluation_latency_sec",
+        f"{p2}_total_time_hours": "evaluation_total_time_hours",
+        f"{p2}_peak_memory_gb": "evaluation_peak_memory_gb",
+    }
+
+
+def metric_fields(labels: dict[str, str] | None = None) -> list[dict[str, str]]:
+    """Leaderboard table columns, in display order, labeled per target.
+
+    This is the table layout only; it does not include every numeric field
+    (see NUMERIC_METRIC_KEYS for schema constraints).
+    """
+    lbl = {**DEFAULT_LABELS, **(labels or {})}
+    return [
+        {"key": "obfuscation_total_time_hours", "label": f"{lbl['phase1_short']} total time", "unit": "h"},
+        {"key": "evaluation_total_time_hours", "label": f"{lbl['phase2_short']} total time", "unit": "h"},
+        {"key": "storage_gb", "label": lbl["size"], "unit": "GB"},
+        {"key": "obfuscation_latency_sec", "label": f"{lbl['phase1_short']} latency", "unit": "sec"},
+        {"key": "evaluation_latency_sec", "label": f"{lbl['phase2_short']} latency", "unit": "sec"},
+    ]
 
 # All numeric metric fields on the model (independent of table display), used to
 # apply the non-negative (minimum: 0) constraint in the generated JSON Schema.

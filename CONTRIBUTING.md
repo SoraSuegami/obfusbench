@@ -34,13 +34,32 @@ Thank you for contributing a benchmark entry! This guide explains how to submit 
 | `date` | string (`YYYY-MM-DD`) | **yes** | Date the benchmark was measured; used as the x-axis on trend charts |
 | `target` | string | no | Benchmark target id from `config/site.yaml` (e.g. `obfuscated-prf-110`, `witness-encryption-64`); defaults to the first configured target |
 | `device` | string | no | Short GPU id the benchmark ran on (see `config/gpu_devices.yaml`, e.g. `H100`, `H200`, `A100`); used to derive cost. Cost is shown only when set |
-| `obfuscation_latency_sec` | float >= 0 | **yes** | Obfuscation time in seconds |
-| `obfuscation_total_time_hours` | float >= 0 | **yes** | Total obfuscation wall-clock time in hours |
-| `obfuscation_peak_memory_gb` | float >= 0 | no | Obfuscation peak memory in GB; displayed as ND when omitted |
-| `storage_gb` | float >= 0 | **yes** | Storage size (obfuscated circuit size) in GB |
-| `evaluation_latency_sec` | float >= 0 | **yes** | Evaluation time in seconds |
-| `evaluation_total_time_hours` | float >= 0 | **yes** | Total evaluation wall-clock time in hours |
-| `evaluation_peak_memory_gb` | float >= 0 | no | Evaluation peak memory in GB; displayed as ND when omitted |
+| `<phase1>_latency_sec` | float >= 0 | **yes** | Phase-1 time in seconds |
+| `<phase1>_total_time_hours` | float >= 0 | **yes** | Total phase-1 wall-clock time in hours |
+| `<phase1>_peak_memory_gb` | float >= 0 | no | Phase-1 peak memory in GB; displayed as ND when omitted |
+| `<size>` | float >= 0 | **yes** | Output size in GB |
+| `<phase2>_latency_sec` | float >= 0 | **yes** | Phase-2 time in seconds |
+| `<phase2>_total_time_hours` | float >= 0 | **yes** | Total phase-2 wall-clock time in hours |
+| `<phase2>_peak_memory_gb` | float >= 0 | no | Phase-2 peak memory in GB; displayed as ND when omitted |
+
+#### Metric field names depend on the target
+
+The seven metric fields above use **target-specific key names** (defined by each
+target's `labels` in `config/site.yaml`). Use the names matching your `target`;
+using another target's names is rejected with a hint.
+
+| Generic | `obfuscated-prf-110` (default) | `witness-encryption-64` |
+|---|---|---|
+| `<phase1>_latency_sec` | `obfuscation_latency_sec` | `encryption_latency_sec` |
+| `<phase1>_total_time_hours` | `obfuscation_total_time_hours` | `encryption_total_time_hours` |
+| `<phase1>_peak_memory_gb` | `obfuscation_peak_memory_gb` | `encryption_peak_memory_gb` |
+| `<size>` | `storage_gb` | `ciphertext_size_gb` |
+| `<phase2>_latency_sec` | `evaluation_latency_sec` | `decryption_latency_sec` |
+| `<phase2>_total_time_hours` | `evaluation_total_time_hours` | `decryption_total_time_hours` |
+| `<phase2>_peak_memory_gb` | `evaluation_peak_memory_gb` | `decryption_peak_memory_gb` |
+
+`examples/benchmark.example.yaml` uses the default-target names. For another
+target, rename these keys per the table above.
 
 ### Cost is derived, not submitted
 
