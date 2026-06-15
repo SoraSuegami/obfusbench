@@ -10,7 +10,7 @@ import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from .models import METRIC_FIELDS, Benchmark
-from .utils import commit_url, format_number
+from .utils import commit_url, format_number, format_sci
 
 
 PROTECTED_OUTPUT_DIRS = (
@@ -96,6 +96,7 @@ def create_jinja_env(templates_dir: Path) -> Environment:
         autoescape=select_autoescape(["html"]),
     )
     env.filters["format_number"] = format_number
+    env.filters["format_sci"] = format_sci
     env.globals["commit_url"] = commit_url
     env.globals["metric_fields"] = METRIC_FIELDS
     return env

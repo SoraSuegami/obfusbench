@@ -21,6 +21,17 @@ def format_number(value: float | None) -> str:
     return formatted
 
 
+def format_sci(value: float | None) -> str:
+    """Format a number in scientific notation (3 significant digits, e.g. 5.94e+05).
+
+    Used for the leaderboard table so every numeric cell shares one format.
+    Unavailable values render as ND.
+    """
+    if value is None:
+        return "ND"
+    return f"{value:.2e}"
+
+
 def commit_url(repo_url: str | None, commit: str | None) -> str | None:
     """Build a GitHub commit URL if both repo_url and commit look right."""
     if not repo_url or not commit:

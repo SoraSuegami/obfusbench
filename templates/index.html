@@ -77,7 +77,7 @@
                         <td>{{ bm.authors | join(", ") }}</td>
                         <td>{{ bm.developers | join(", ") }}</td>
                         {% for m in metric_fields %}
-                        <td class="numeric" data-value="{% if bm[m.key] is not none %}{{ bm[m.key] }}{% endif %}">{{ bm[m.key] | format_number }}</td>
+                        <td class="numeric" data-value="{% if bm[m.key] is not none %}{{ bm[m.key] }}{% endif %}">{{ bm[m.key] | format_sci }}</td>
                         {% endfor %}
                     </tr>
                     {% endfor %}
