@@ -159,15 +159,11 @@ class Benchmark(BaseModel):
 
 # Metric fields for iteration
 METRIC_FIELDS: list[dict[str, str]] = [
-    {"key": "obfuscation_latency_sec", "label": "Obf. latency", "unit": "sec"},
     {"key": "obfuscation_total_time_hours", "label": "Obf. total time", "unit": "h"},
-    {"key": "obfuscation_cost_usd", "label": "Obf. cost", "unit": "$"},
-    {"key": "obfuscation_peak_memory_gb", "label": "Obf. peak mem", "unit": "GB"},
-    {"key": "storage_gb", "label": "Storage", "unit": "GB"},
-    {"key": "evaluation_latency_sec", "label": "Eval. latency", "unit": "sec"},
     {"key": "evaluation_total_time_hours", "label": "Eval. total time", "unit": "h"},
-    {"key": "evaluation_cost_usd", "label": "Eval. cost", "unit": "$"},
-    {"key": "evaluation_peak_memory_gb", "label": "Eval. peak mem", "unit": "GB"},
+    {"key": "storage_gb", "label": "Obfuscation size", "unit": "GB"},
+    {"key": "obfuscation_latency_sec", "label": "Obf. latency", "unit": "sec"},
+    {"key": "evaluation_latency_sec", "label": "Eval. latency", "unit": "sec"},
 ]
 
 

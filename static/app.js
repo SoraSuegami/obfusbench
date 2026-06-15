@@ -151,7 +151,8 @@
         // Read initial sort from URL
         var params = new URLSearchParams(window.location.search);
         var currentSort = params.get("sort") || null;
-        var currentDir = params.get("dir") || "asc";
+        // Sorting is always ascending (smaller values first).
+        var currentDir = "asc";
 
         function sortTable(key, dir) {
             var rows = Array.prototype.slice.call(tbody.querySelectorAll("tr"));
@@ -207,22 +208,16 @@
         headers.forEach(function (th) {
             th.addEventListener("click", function () {
                 var key = th.getAttribute("data-sort");
-                var dir;
-                if (currentSort === key) {
-                    dir = currentDir === "asc" ? "desc" : "asc";
-                } else {
-                    // Default: ascending (lower is better for metrics)
-                    dir = "asc";
-                }
+                // Always sort ascending (smaller values first); no descending toggle.
                 currentSort = key;
-                currentDir = dir;
+                currentDir = "asc";
 
-                sortTable(key, dir);
+                sortTable(key, "asc");
 
                 // Update URL
                 var url = new URL(window.location);
                 url.searchParams.set("sort", key);
-                url.searchParams.set("dir", dir);
+                url.searchParams.set("dir", "asc");
                 window.history.replaceState(null, "", url);
             });
 
