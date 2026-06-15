@@ -47,7 +47,7 @@
             },
         },
         {
-            xTitle: "Obfuscated circuit size (GB)",
+            xTitle: "Obfuscation size (GB)",
             yTitle: "Evaluation total time (hours)",
             xIsDate: false,
             // Diagonal goal line connecting 1000 GB on the x-axis with
