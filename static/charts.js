@@ -21,6 +21,11 @@
         return d.getUTCFullYear() + "-" + m + "-" + day;
     }
 
+    // Scientific notation matching the leaderboard table (e.g. "4.42e+46").
+    function formatSci(v) {
+        return Number(v).toExponential(2);
+    }
+
     // Each spec maps a benchmark to an {x, y} point plus axis metadata.
     // "goal" draws a horizontal line marking the ideal target value; those
     // charts use a logarithmic y-axis so the goal stays visible next to
@@ -32,6 +37,8 @@
             xIsDate: true,
             goal: 1,
             goalLabel: "Goal: 1 hour",
+            // Derived cost shown in the tooltip (total-time charts only).
+            costKey: "evaluation_cost_usd",
             point: function (b) {
                 return { x: dateToTs(b.date), y: b.evaluation_total_time_hours };
             },
@@ -42,6 +49,7 @@
             xIsDate: true,
             goal: 1000,
             goalLabel: "Goal: 1000 hours",
+            costKey: "obfuscation_cost_usd",
             point: function (b) {
                 return { x: dateToTs(b.date), y: b.obfuscation_total_time_hours };
             },
@@ -55,6 +63,7 @@
             goalX: 1000,
             goalY: 1,
             goalLabel: "Goal: 1000 GB, 1 hour",
+            costKey: "evaluation_cost_usd",
             point: function (b) {
                 return { x: b.storage_gb, y: b.evaluation_total_time_hours };
             },
@@ -175,6 +184,11 @@
             var points = data.map(function (b) {
                 var p = spec.point(b);
                 p.id = b.id;
+                // Carry cost for total-time charts (spec.costKey set).
+                if (spec.costKey) {
+                    p.device = b.device;
+                    p.cost = b[spec.costKey];
+                }
                 return p;
             });
 
@@ -277,7 +291,7 @@
                                     var xLabel = spec.xIsDate
                                         ? tsToLabel(raw.x)
                                         : raw.x;
-                                    return (
+                                    var lines = [
                                         raw.id +
                                         " (" +
                                         spec.xTitle +
@@ -287,8 +301,18 @@
                                         spec.yTitle +
                                         ": " +
                                         raw.y +
-                                        ")"
-                                    );
+                                        ")",
+                                    ];
+                                    // Total-time charts also show derived cost.
+                                    if (spec.costKey && raw.device) {
+                                        lines.push(
+                                            "Cost: " +
+                                            (raw.cost != null
+                                                ? "$" + formatSci(raw.cost)
+                                                : "ND")
+                                        );
+                                    }
+                                    return lines;
                                 },
                             },
                         },

@@ -166,6 +166,7 @@ def build_site(
         by_target[bm.target].append(bm)
 
     def chart_entry(bm: Benchmark) -> dict:
+        costs = costs_for(bm)
         return {
             "id": bm.id,
             "slug": bm.slug,
@@ -175,6 +176,10 @@ def build_site(
             "evaluation_latency_sec": bm.evaluation_latency_sec,
             "evaluation_total_time_hours": bm.evaluation_total_time_hours,
             "storage_gb": bm.storage_gb,
+            "device": bm.device,
+            # Derived total-time cost (price x total time); null when no price.
+            "obfuscation_cost_usd": costs["obfuscation_total_time_hours"],
+            "evaluation_cost_usd": costs["evaluation_total_time_hours"],
         }
 
     # Build index page
