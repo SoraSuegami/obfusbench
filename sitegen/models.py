@@ -51,15 +51,21 @@ class Benchmark(BaseModel):
             "Defaults to the first configured target when omitted."
         ),
     )
+    device: str | None = Field(
+        default=None,
+        description=(
+            "Short GPU id the benchmark ran on (see config/gpu_devices.yaml), "
+            "e.g. 'H100', 'H200', 'A100'. Used to look up the hourly price so "
+            "cost can be derived as price x total time."
+        ),
+    )
 
     obfuscation_latency_sec: float
     obfuscation_total_time_hours: float
-    obfuscation_cost_usd: float
     obfuscation_peak_memory_gb: float | None = None
     storage_gb: float
     evaluation_latency_sec: float
     evaluation_total_time_hours: float
-    evaluation_cost_usd: float
     evaluation_peak_memory_gb: float | None = None
 
     # Set after validation
@@ -117,6 +123,15 @@ class Benchmark(BaseModel):
             raise ValueError("target must be a non-empty string")
         return v.strip()
 
+    @field_validator("device", mode="before")
+    @classmethod
+    def normalize_device(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        if not isinstance(v, str) or not v.strip():
+            raise ValueError("device must be a non-empty string")
+        return v.strip()
+
     @field_validator("commit", mode="before")
     @classmethod
     def normalize_commit(cls, v: str | None) -> str | None:
@@ -129,11 +144,9 @@ class Benchmark(BaseModel):
     @field_validator(
         "obfuscation_latency_sec",
         "obfuscation_total_time_hours",
-        "obfuscation_cost_usd",
         "storage_gb",
         "evaluation_latency_sec",
         "evaluation_total_time_hours",
-        "evaluation_cost_usd",
     )
     @classmethod
     def check_metric(cls, v: float, info) -> float:
@@ -157,7 +170,8 @@ class Benchmark(BaseModel):
         return self
 
 
-# Metric fields for iteration
+# Leaderboard table columns, in display order. This is the table layout only;
+# it does not include every numeric field (see NUMERIC_METRIC_KEYS for schema).
 METRIC_FIELDS: list[dict[str, str]] = [
     {"key": "obfuscation_total_time_hours", "label": "Obf. total time", "unit": "h"},
     {"key": "evaluation_total_time_hours", "label": "Eval. total time", "unit": "h"},
@@ -165,6 +179,18 @@ METRIC_FIELDS: list[dict[str, str]] = [
     {"key": "obfuscation_latency_sec", "label": "Obf. latency", "unit": "sec"},
     {"key": "evaluation_latency_sec", "label": "Eval. latency", "unit": "sec"},
 ]
+
+# All numeric metric fields on the model (independent of table display), used to
+# apply the non-negative (minimum: 0) constraint in the generated JSON Schema.
+NUMERIC_METRIC_KEYS: tuple[str, ...] = (
+    "obfuscation_latency_sec",
+    "obfuscation_total_time_hours",
+    "obfuscation_peak_memory_gb",
+    "storage_gb",
+    "evaluation_latency_sec",
+    "evaluation_total_time_hours",
+    "evaluation_peak_memory_gb",
+)
 
 
 def generate_json_schema() -> dict:
@@ -195,13 +221,14 @@ def generate_json_schema() -> dict:
         if branch.get("type") == "string":
             branch.update({"format": "uri", "pattern": r"^https?://[^\s/]+(?:/[^\s]*)?$"})
 
-    target_prop = properties.get("target", {})
-    for branch in target_prop.get("anyOf", []):
-        if branch.get("type") == "string":
-            branch.update({"minLength": 1, "pattern": r".*\S.*"})
+    for key in ("target", "device"):
+        prop = properties.get(key, {})
+        for branch in prop.get("anyOf", []):
+            if branch.get("type") == "string":
+                branch.update({"minLength": 1, "pattern": r".*\S.*"})
 
-    for metric in METRIC_FIELDS:
-        prop = properties.get(metric["key"], {})
+    for key in NUMERIC_METRIC_KEYS:
+        prop = properties.get(key, {})
         if prop.get("type") == "number":
             prop["minimum"] = 0
         for branch in prop.get("anyOf", []):

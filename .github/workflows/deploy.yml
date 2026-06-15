@@ -3,10 +3,19 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  schedule:
+    # Hourly rebuild so the live site picks up current RunPod GPU prices.
+    # Offset from :00 because exact-hour crons are the most delayed/dropped.
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
+
+# Never run two deploys at once (e.g. a push and the hourly schedule overlapping).
+concurrency:
+  group: github-pages-deploy
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -25,7 +34,13 @@ jobs:
         run: python -m sitegen validate
 
       - name: Build site
+        # Fetches live RunPod prices at build time. The pricing query is public
+        # (no auth required), so RUNPOD_API_KEY is optional and kept only as a
+        # safety net in case RunPod starts requiring auth. If the fetch fails,
+        # cost renders as ND (there is no committed fallback price).
         run: python -m sitegen build --output site
+        env:
+          RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
 
       - uses: actions/configure-pages@v5
 

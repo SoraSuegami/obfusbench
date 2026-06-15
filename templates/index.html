@@ -72,12 +72,13 @@
                 </thead>
                 <tbody>
                     {% for bm in t.benchmarks %}
+                    {% set bm_costs = t.costs_by_slug[bm.slug] %}
                     <tr>
                         <td><a href="{{ base_url }}implementations/{{ bm.slug }}/">{{ bm.id }}</a></td>
                         <td>{{ bm.authors | join(", ") }}</td>
                         <td>{{ bm.developers | join(", ") }}</td>
                         {% for m in metric_fields %}
-                        <td class="numeric" data-value="{% if bm[m.key] is not none %}{{ bm[m.key] }}{% endif %}">{{ bm[m.key] | format_sci }}</td>
+                        <td class="numeric" data-value="{% if bm[m.key] is not none %}{{ bm[m.key] }}{% endif %}">{{ bm[m.key] | format_sci }}{% if m.key in bm_costs and bm.device %}<br><span class="cell-cost">({% if bm_costs[m.key] is not none %}${{ bm_costs[m.key] | format_sci }}{% else %}ND{% endif %})</span>{% endif %}</td>
                         {% endfor %}
                     </tr>
                     {% endfor %}

@@ -190,6 +190,13 @@ tbody td.numeric {
     font-variant-numeric: tabular-nums;
 }
 
+/* Derived cost (price x total time), shown under the total-time value. */
+.cell-cost {
+    display: block;
+    font-size: 0.8em;
+    color: var(--color-text-muted, #6b7280);
+}
+
 tbody tr:hover {
     background: var(--color-row-hover);
 }

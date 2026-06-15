@@ -33,15 +33,20 @@ Thank you for contributing a benchmark entry! This guide explains how to submit 
 | `commit` | string | no | Commit hash or version identifier |
 | `date` | string (`YYYY-MM-DD`) | **yes** | Date the benchmark was measured; used as the x-axis on trend charts |
 | `target` | string | no | Benchmark target id from `config/site.yaml` (e.g. `obfuscated-prf-110`, `witness-encryption-64`); defaults to the first configured target |
+| `device` | string | no | Short GPU id the benchmark ran on (see `config/gpu_devices.yaml`, e.g. `H100`, `H200`, `A100`); used to derive cost. Cost is shown only when set |
 | `obfuscation_latency_sec` | float >= 0 | **yes** | Obfuscation time in seconds |
 | `obfuscation_total_time_hours` | float >= 0 | **yes** | Total obfuscation wall-clock time in hours |
-| `obfuscation_cost_usd` | float >= 0 | **yes** | Obfuscation cost in USD |
 | `obfuscation_peak_memory_gb` | float >= 0 | no | Obfuscation peak memory in GB; displayed as ND when omitted |
 | `storage_gb` | float >= 0 | **yes** | Storage size (obfuscated circuit size) in GB |
 | `evaluation_latency_sec` | float >= 0 | **yes** | Evaluation time in seconds |
 | `evaluation_total_time_hours` | float >= 0 | **yes** | Total evaluation wall-clock time in hours |
-| `evaluation_cost_usd` | float >= 0 | **yes** | Evaluation cost in USD |
 | `evaluation_peak_memory_gb` | float >= 0 | no | Evaluation peak memory in GB; displayed as ND when omitted |
+
+> **Cost is not a field.** Obfuscation/evaluation cost is derived automatically as
+> the device's hourly price × total time. Hourly prices come from RunPod at build
+> time (with an offline fallback in `config/gpu_devices.yaml`). To get cost shown
+> for your entry, set `device` to a GPU id listed in `config/gpu_devices.yaml`;
+> add a new id there if yours is missing.
 
 ## File naming conventions
 

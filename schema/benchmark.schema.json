@@ -92,6 +92,21 @@
       "description": "Benchmark target id (see targets in config/site.yaml). Defaults to the first configured target when omitted.",
       "title": "Target"
     },
+    "device": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "pattern": ".*\\S.*"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Short GPU id the benchmark ran on (see config/gpu_devices.yaml), e.g. 'H100', 'H200', 'A100'. Used to look up the hourly price so cost can be derived as price x total time.",
+      "title": "Device"
+    },
     "obfuscation_latency_sec": {
       "title": "Obfuscation Latency Sec",
       "type": "number",
@@ -99,11 +114,6 @@
     },
     "obfuscation_total_time_hours": {
       "title": "Obfuscation Total Time Hours",
-      "type": "number",
-      "minimum": 0
-    },
-    "obfuscation_cost_usd": {
-      "title": "Obfuscation Cost Usd",
       "type": "number",
       "minimum": 0
     },
@@ -135,11 +145,6 @@
       "type": "number",
       "minimum": 0
     },
-    "evaluation_cost_usd": {
-      "title": "Evaluation Cost Usd",
-      "type": "number",
-      "minimum": 0
-    },
     "evaluation_peak_memory_gb": {
       "anyOf": [
         {
@@ -161,11 +166,9 @@
     "date",
     "obfuscation_latency_sec",
     "obfuscation_total_time_hours",
-    "obfuscation_cost_usd",
     "storage_gb",
     "evaluation_latency_sec",
-    "evaluation_total_time_hours",
-    "evaluation_cost_usd"
+    "evaluation_total_time_hours"
   ],
   "title": "Benchmark",
   "type": "object"

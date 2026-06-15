@@ -18,6 +18,10 @@
             <dd>{{ benchmark.developers | join(", ") }}</dd>
             <dt>Date</dt>
             <dd>{{ benchmark.date.isoformat() }}</dd>
+            {% if benchmark.device %}
+            <dt>Device</dt>
+            <dd>{{ benchmark.device }}{% if device_hourly_price_usd is not none %} (${{ device_hourly_price_usd | format_number }}/h){% endif %}</dd>
+            {% endif %}
             {% if benchmark.url %}
             <dt>URL</dt>
             <dd><a href="{{ benchmark.url }}" rel="noopener noreferrer">{{ benchmark.url }}</a></dd>
@@ -48,7 +52,7 @@
             </div>
             <div class="metric-card">
                 <span class="metric-label">Cost</span>
-                <span class="metric-value">{{ benchmark.obfuscation_cost_usd | format_number }} <span class="unit">USD</span></span>
+                <span class="metric-value">{{ obfuscation_cost_usd | format_number }}{% if obfuscation_cost_usd is not none %} <span class="unit">USD</span>{% endif %}</span>
             </div>
             <div class="metric-card">
                 <span class="metric-label">Peak memory</span>
@@ -74,7 +78,7 @@
             </div>
             <div class="metric-card">
                 <span class="metric-label">Cost</span>
-                <span class="metric-value">{{ benchmark.evaluation_cost_usd | format_number }} <span class="unit">USD</span></span>
+                <span class="metric-value">{{ evaluation_cost_usd | format_number }}{% if evaluation_cost_usd is not none %} <span class="unit">USD</span>{% endif %}</span>
             </div>
             <div class="metric-card">
                 <span class="metric-label">Peak memory</span>

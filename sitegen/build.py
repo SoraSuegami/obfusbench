@@ -10,7 +10,11 @@ import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from .models import METRIC_FIELDS, Benchmark
+from .pricing import price_for_device, resolve_prices
 from .utils import commit_url, format_number, format_sci
+
+# Total-time metrics whose cells also show derived cost (price x total time).
+COST_METRIC_KEYS = ("obfuscation_total_time_hours", "evaluation_total_time_hours")
 
 
 PROTECTED_OUTPUT_DIRS = (
@@ -102,12 +106,36 @@ def create_jinja_env(templates_dir: Path) -> Environment:
     return env
 
 
-def build_site(benchmarks: list[Benchmark], output_dir: Path, project_root: Path) -> None:
-    """Generate the full static site."""
+def build_site(
+    benchmarks: list[Benchmark],
+    output_dir: Path,
+    project_root: Path,
+    prices: dict[str, float] | None = None,
+) -> None:
+    """Generate the full static site.
+
+    ``prices`` maps a normalized device name to its USD/hour rate; when omitted
+    the committed fallback file is used (no network access). Cost is derived as
+    ``price * total_time_hours`` and is never read from the benchmark YAML.
+    """
     project_root = project_root.resolve()
     output_dir = validate_output_dir(output_dir, project_root)
     config = load_site_config(project_root / "config" / "site.yaml")
     env = create_jinja_env(project_root / "templates")
+
+    if prices is None:
+        prices, _ = resolve_prices(project_root, fetch=False)
+
+    def costs_for(bm: Benchmark) -> dict[str, float | None]:
+        rate = price_for_device(prices, bm.device)
+        return {
+            "obfuscation_total_time_hours": (
+                bm.obfuscation_total_time_hours * rate if rate is not None else None
+            ),
+            "evaluation_total_time_hours": (
+                bm.evaluation_total_time_hours * rate if rate is not None else None
+            ),
+        }
 
     # Clean and create output directory
     if output_dir.exists():
@@ -156,6 +184,7 @@ def build_site(benchmarks: list[Benchmark], output_dir: Path, project_root: Path
             "name": t["name"],
             "benchmarks": by_target[t["id"]],
             "chart_data": [chart_entry(bm) for bm in by_target[t["id"]]],
+            "costs_by_slug": {bm.slug: costs_for(bm) for bm in by_target[t["id"]]},
         }
         for t in targets
     ]
@@ -172,6 +201,7 @@ def build_site(benchmarks: list[Benchmark], output_dir: Path, project_root: Path
     for bm in benchmarks:
         page_dir = impl_dir / bm.slug
         page_dir.mkdir(parents=True)
+        costs = costs_for(bm)
         # Depth for relative paths: implementations/<slug>/index.html -> ../../
         detail_html = detail_tpl.render(
             benchmark=bm,
@@ -179,6 +209,9 @@ def build_site(benchmarks: list[Benchmark], output_dir: Path, project_root: Path
             base_url="../../",
             site=config,
             commit_link=commit_url(bm.url, bm.commit),
+            obfuscation_cost_usd=costs["obfuscation_total_time_hours"],
+            evaluation_cost_usd=costs["evaluation_total_time_hours"],
+            device_hourly_price_usd=price_for_device(prices, bm.device),
         )
         (page_dir / "index.html").write_text(detail_html)
 
@@ -194,6 +227,11 @@ def build_site(benchmarks: list[Benchmark], output_dir: Path, project_root: Path
     for bm in benchmarks:
         entry = bm.model_dump(mode="json")
         entry.pop("slug", None)
+        costs = costs_for(bm)
+        # Cost is derived, not stored: price x total time.
+        entry["device_hourly_price_usd"] = price_for_device(prices, bm.device)
+        entry["obfuscation_cost_usd"] = costs["obfuscation_total_time_hours"]
+        entry["evaluation_cost_usd"] = costs["evaluation_total_time_hours"]
         data.append(entry)
     (output_dir / "benchmarks.json").write_text(
         json.dumps(data, indent=2, ensure_ascii=False)

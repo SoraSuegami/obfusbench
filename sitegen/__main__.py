@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
 from .build import build_site, load_site_config, load_targets
 from .load import load_benchmarks
 from .models import generate_json_schema
+from .pricing import resolve_prices
 
 
 def find_project_root() -> Path:
@@ -52,7 +54,12 @@ def cmd_build(args: argparse.Namespace) -> None:
     output_dir = Path(args.output).resolve()
 
     benchmarks = _load_validated_benchmarks(project_root)
-    build_site(benchmarks, output_dir, project_root)
+
+    fetch = os.environ.get("OBFUSBENCH_NO_FETCH") != "1"
+    prices, source = resolve_prices(project_root, fetch=fetch)
+    print(f"RunPod prices: {len(prices)} resolved ({source}); missing render as ND.")
+
+    build_site(benchmarks, output_dir, project_root, prices=prices)
 
 
 def main() -> None:

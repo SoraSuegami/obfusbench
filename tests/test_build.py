@@ -18,14 +18,13 @@ VALID_DATA = {
     "url": "https://github.com/example/repo",
     "commit": "abc1234",
     "date": "2026-01-15",
+    "device": "H100",
     "obfuscation_latency_sec": 100.0,
     "obfuscation_total_time_hours": 1.0,
-    "obfuscation_cost_usd": 50.0,
     "obfuscation_peak_memory_gb": 32.0,
     "storage_gb": 256.0,
     "evaluation_latency_sec": 0.5,
     "evaluation_total_time_hours": 0.1,
-    "evaluation_cost_usd": 0.01,
     "evaluation_peak_memory_gb": 2.0,
 }
 
@@ -91,7 +90,11 @@ def test_build_with_one_benchmark(tmp_path):
 
 
 def test_build_missing_peak_memory_displays_nd(tmp_path):
-    """Missing peak memory fields render as ND and are exported as null."""
+    """Missing peak memory renders as ND on the detail page and is null in JSON.
+
+    Peak memory is not a leaderboard column, so it only appears on the detail
+    page; the table never shows ND for it.
+    """
     benchmarks_dir = tmp_path / "benchmarks"
     benchmarks_dir.mkdir()
     output_dir = tmp_path / "site"
@@ -103,10 +106,6 @@ def test_build_missing_peak_memory_displays_nd(tmp_path):
 
     benchmarks = load_benchmarks(benchmarks_dir)
     build_site(benchmarks, output_dir, PROJECT_ROOT)
-
-    index_html = (output_dir / "index.html").read_text()
-    assert ">ND</td>" in index_html
-    assert ">ND GB<" not in index_html
 
     detail_html = (
         output_dir / "implementations" / "test-implementation" / "index.html"

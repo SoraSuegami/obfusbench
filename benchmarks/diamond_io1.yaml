@@ -5,12 +5,9 @@ url: "https://github.com/MachinaIO/mxx"
 commit: "c7c4fea"
 date: "2026-06-02"
 target: "obfuscated-prf-110"
+device: "H200"
 obfuscation_latency_sec: 1.26e5
 obfuscation_total_time_hours: 3.93e45
-obfuscation_cost_usd: 1.44686e46
-# obfuscation_peak_memory_gb: 56.554553344
 storage_gb: 2.04e46
 evaluation_latency_sec: 5.84e5
 evaluation_total_time_hours: 1.03e36
-evaluation_cost_usd: 1.17847e36
-# evaluation_peak_memory_gb: 56.554553344

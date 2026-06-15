@@ -13,14 +13,13 @@ VALID_DATA = {
     "url": "https://github.com/example/repo",
     "commit": "abc1234",
     "date": "2026-01-15",
+    "device": "H100",
     "obfuscation_latency_sec": 100.0,
     "obfuscation_total_time_hours": 1.0,
-    "obfuscation_cost_usd": 50.0,
     "obfuscation_peak_memory_gb": 32.0,
     "storage_gb": 256.0,
     "evaluation_latency_sec": 0.5,
     "evaluation_total_time_hours": 0.1,
-    "evaluation_cost_usd": 0.01,
     "evaluation_peak_memory_gb": 2.0,
 }
 
@@ -58,7 +57,7 @@ def test_reject_negative_metric():
 
 
 def test_reject_infinite_metric():
-    data = {**VALID_DATA, "obfuscation_cost_usd": float("inf")}
+    data = {**VALID_DATA, "obfuscation_total_time_hours": float("inf")}
     with pytest.raises(ValidationError, match="finite"):
         Benchmark(**data)
 
