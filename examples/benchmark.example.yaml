@@ -22,3 +22,22 @@ storage_gb: 512.0
 evaluation_latency_sec: 0.42
 evaluation_total_time_hours: 0.02
 evaluation_peak_memory_gb: 2.5
+
+# Optional: per-step breakdowns shown on the detail page as a 100% stacked bar
+# plus a share table. The <phase1>/<phase2> tokens follow the target (see the
+# table in CONTRIBUTING.md). Sub-steps may sum to less than the phase total; the
+# remainder renders as an "Other" slice. Omit any block you don't have.
+#
+# obfuscation_time_breakdown:   # where <phase1> total time goes
+#   - step: "Trapdoor sampling"
+#     time_hours: 0.9
+#   - step: "Matrix encoding"
+#     time_hours: 0.4
+# evaluation_time_breakdown:    # where <phase2> total time goes
+#   - step: "Matrix products"
+#     time_hours: 0.015
+# obfuscation_size_breakdown:   # what makes up <size>
+#   - component: "Encoded matrices"
+#     size_gb: 400.0
+#   - component: "Public parameters"
+#     size_gb: 112.0

@@ -33,6 +33,52 @@ def _check_optional_finite_nonneg(v: float | None, field_name: str) -> float | N
     return _check_finite_nonneg(v, field_name)
 
 
+class TimeBreakdownItem(BaseModel):
+    """One sub-step of a phase, with the wall-clock time it accounts for.
+
+    The sub-steps of a phase need not sum to the phase total; the site fills the
+    remainder into a synthetic "Other" slice at build time.
+    """
+
+    model_config = {"extra": "forbid"}
+
+    step: str
+    time_hours: float
+
+    @field_validator("step")
+    @classmethod
+    def step_must_be_nonempty(cls, v: str) -> str:
+        if not isinstance(v, str) or not v.strip():
+            raise ValueError("step must be a non-empty string")
+        return v.strip()
+
+    @field_validator("time_hours")
+    @classmethod
+    def check_time(cls, v: float, info) -> float:
+        return _check_finite_nonneg(v, info.field_name)
+
+
+class SizeBreakdownItem(BaseModel):
+    """One component of the output size, with the storage it accounts for."""
+
+    model_config = {"extra": "forbid"}
+
+    component: str
+    size_gb: float
+
+    @field_validator("component")
+    @classmethod
+    def component_must_be_nonempty(cls, v: str) -> str:
+        if not isinstance(v, str) or not v.strip():
+            raise ValueError("component must be a non-empty string")
+        return v.strip()
+
+    @field_validator("size_gb")
+    @classmethod
+    def check_size(cls, v: float, info) -> float:
+        return _check_finite_nonneg(v, info.field_name)
+
+
 class Benchmark(BaseModel):
     """A single iO implementation benchmark entry."""
 
@@ -67,6 +113,14 @@ class Benchmark(BaseModel):
     evaluation_latency_sec: float
     evaluation_total_time_hours: float
     evaluation_peak_memory_gb: float | None = None
+
+    # Optional per-step breakdowns of where each phase spends its total time, and
+    # of what makes up the output size. Each list is an ordered (pipeline-order)
+    # set of sub-steps; sub-steps may sum to less than the phase total (the build
+    # fills the remainder into an "Other" slice). None = no breakdown to show.
+    obfuscation_time_breakdown: list[TimeBreakdownItem] | None = None
+    evaluation_time_breakdown: list[TimeBreakdownItem] | None = None
+    obfuscation_size_breakdown: list[SizeBreakdownItem] | None = None
 
     # Set after validation
     slug: str = ""
@@ -169,6 +223,46 @@ class Benchmark(BaseModel):
             raise ValueError("id must contain at least one URL-safe character")
         return self
 
+    @model_validator(mode="after")
+    def check_breakdowns_within_total(self) -> "Benchmark":
+        """A breakdown's sub-steps must not sum to more than the phase total.
+
+        The remainder (total - sum) is rendered as an "Other" slice, so an
+        overflowing sum would imply a negative "Other" and is rejected. A small
+        relative tolerance absorbs floating-point rounding in contributor data.
+        """
+        tol = 1e-6
+
+        def _check(items, value_attr: str, total: float, name: str) -> None:
+            if not items:
+                return
+            subtotal = sum(getattr(i, value_attr) for i in items)
+            if subtotal > total * (1 + tol):
+                raise ValueError(
+                    f"{name} sub-steps sum ({subtotal:.3e}) exceeds the phase "
+                    f"total ({total:.3e})"
+                )
+
+        _check(
+            self.obfuscation_time_breakdown,
+            "time_hours",
+            self.obfuscation_total_time_hours,
+            "obfuscation_time_breakdown",
+        )
+        _check(
+            self.evaluation_time_breakdown,
+            "time_hours",
+            self.evaluation_total_time_hours,
+            "evaluation_time_breakdown",
+        )
+        _check(
+            self.obfuscation_size_breakdown,
+            "size_gb",
+            self.storage_gb,
+            "obfuscation_size_breakdown",
+        )
+        return self
+
 
 # Default labels (obfuscation terminology). A target in config/site.yaml may
 # override any of these to rename the two phases / the size metric. The *_key
@@ -186,7 +280,8 @@ DEFAULT_LABELS: dict[str, str] = {
     "size_key": "storage_gb",
 }
 
-# Canonical (internal) metric field names on the Benchmark model.
+# Canonical (internal) metric field names on the Benchmark model. Includes the
+# optional breakdown lists so the loader rejects another target's breakdown keys.
 CANONICAL_METRIC_KEYS: tuple[str, ...] = (
     "obfuscation_latency_sec",
     "obfuscation_total_time_hours",
@@ -195,6 +290,9 @@ CANONICAL_METRIC_KEYS: tuple[str, ...] = (
     "evaluation_latency_sec",
     "evaluation_total_time_hours",
     "evaluation_peak_memory_gb",
+    "obfuscation_time_breakdown",
+    "evaluation_time_breakdown",
+    "obfuscation_size_breakdown",
 )
 
 
@@ -213,6 +311,9 @@ def yaml_key_map(labels: dict[str, str] | None = None) -> dict[str, str]:
         f"{p2}_latency_sec": "evaluation_latency_sec",
         f"{p2}_total_time_hours": "evaluation_total_time_hours",
         f"{p2}_peak_memory_gb": "evaluation_peak_memory_gb",
+        f"{p1}_time_breakdown": "obfuscation_time_breakdown",
+        f"{p2}_time_breakdown": "evaluation_time_breakdown",
+        f"{p1}_size_breakdown": "obfuscation_size_breakdown",
     }
 
 
@@ -285,5 +386,14 @@ def generate_json_schema() -> dict:
         for branch in prop.get("anyOf", []):
             if branch.get("type") == "number":
                 branch["minimum"] = 0
+
+    # Mirror the same constraints onto the nested breakdown item models ($defs):
+    # numeric fields are non-negative, label fields are non-blank.
+    for def_schema in schema.get("$defs", {}).values():
+        for prop in def_schema.get("properties", {}).values():
+            if prop.get("type") == "number":
+                prop["minimum"] = 0
+            elif prop.get("type") == "string":
+                prop.update({"minLength": 1, "pattern": r".*\S.*"})
 
     return schema

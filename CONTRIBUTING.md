@@ -61,6 +61,32 @@ using another target's names is rejected with a hint.
 `examples/benchmark.example.yaml` uses the default-target names. For another
 target, rename these keys per the table above.
 
+#### Optional: per-step breakdowns
+
+You may also add ordered (pipeline-order) breakdowns showing where each phase
+spends its total time and what makes up the output size. These render on your
+detail page as a 100% stacked bar plus a share table.
+
+| Generic | `obfuscated-prf-110` (default) | `witness-encryption-64` | Item fields |
+|---|---|---|---|
+| `<phase1>_time_breakdown` | `obfuscation_time_breakdown` | `encryption_time_breakdown` | `step`, `time_hours` |
+| `<phase2>_time_breakdown` | `evaluation_time_breakdown` | `decryption_time_breakdown` | `step`, `time_hours` |
+| `<phase1>_size_breakdown` | `obfuscation_size_breakdown` | `encryption_size_breakdown` | `component`, `size_gb` |
+
+Each is a list of items, e.g.:
+
+```yaml
+obfuscation_time_breakdown:
+  - step: "Trapdoor sampling"
+    time_hours: 5.17e45
+  - step: "Matrix encoding"
+    time_hours: 3.81e45
+```
+
+Sub-steps need not sum to the phase total — the site fills any remainder into an
+"Other" slice. A breakdown whose sub-steps sum to **more** than the phase total
+is rejected. Omit any breakdown you don't have.
+
 ### Cost is derived, not submitted
 
 Obfuscation and evaluation cost are **not** YAML fields. Each is computed as:

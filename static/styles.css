@@ -399,6 +399,127 @@ tbody tr:hover {
     color: var(--color-muted);
 }
 
+/* Time / size breakdown (detail page): 100% stacked bar + share table */
+.breakdown {
+    margin-top: 1.5rem;
+}
+
+.breakdown-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 0.4rem;
+}
+
+.breakdown-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--color-muted);
+}
+
+.breakdown-total {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.breakdown-total .unit {
+    font-size: 0.85em;
+}
+
+.breakdown-bar {
+    display: flex;
+    width: 100%;
+    height: 14px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--color-card-bg);
+}
+
+.breakdown-seg {
+    height: 100%;
+    min-width: 1px;
+}
+
+.breakdown-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin-top: 0.6rem;
+    white-space: normal;
+}
+
+.breakdown-table th,
+.breakdown-table td {
+    padding: 0.35rem 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+}
+
+.breakdown-table th {
+    position: static;
+    top: auto;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-weight: 600;
+    color: var(--color-muted);
+    cursor: default;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.breakdown-table th.numeric,
+.breakdown-table td.numeric {
+    text-align: right;
+}
+
+.breakdown-table td {
+    font-variant-numeric: tabular-nums;
+}
+
+.breakdown-table tr:last-child td {
+    border-bottom: none;
+}
+
+.swatch {
+    display: inline-block;
+    width: 0.7em;
+    height: 0.7em;
+    border-radius: 2px;
+    margin-right: 0.45em;
+}
+
+.share-cell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.share-track {
+    display: inline-block;
+    width: 70px;
+    height: 8px;
+    background: var(--color-card-bg);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.share-fill {
+    display: block;
+    height: 100%;
+    min-width: 1px;
+}
+
+.share-pct {
+    min-width: 3.4em;
+    text-align: right;
+}
+
 /* Charts */
 .charts {
     margin: 1.5rem 0 2.5rem;

@@ -271,6 +271,134 @@ def test_loader_rejects_wrong_target_keys(tmp_path):
         )
 
 
+def test_accept_breakdowns():
+    data = {
+        **VALID_DATA,
+        "obfuscation_time_breakdown": [
+            {"step": "Sampling", "time_hours": 0.6},
+            {"step": "Encoding", "time_hours": 0.3},
+        ],
+        "obfuscation_size_breakdown": [
+            {"component": "Matrices", "size_gb": 200.0},
+        ],
+    }
+    bm = Benchmark(**data)
+    assert len(bm.obfuscation_time_breakdown) == 2
+    assert bm.obfuscation_time_breakdown[0].step == "Sampling"
+    assert bm.obfuscation_size_breakdown[0].size_gb == 200.0
+    assert bm.evaluation_time_breakdown is None
+
+
+def test_breakdowns_default_to_none():
+    bm = Benchmark(**VALID_DATA)
+    assert bm.obfuscation_time_breakdown is None
+    assert bm.evaluation_time_breakdown is None
+    assert bm.obfuscation_size_breakdown is None
+
+
+def test_reject_breakdown_sum_exceeds_total():
+    # obfuscation_total_time_hours is 1.0; sub-steps sum to 1.5.
+    data = {
+        **VALID_DATA,
+        "obfuscation_time_breakdown": [
+            {"step": "A", "time_hours": 1.0},
+            {"step": "B", "time_hours": 0.5},
+        ],
+    }
+    with pytest.raises(ValidationError, match="exceeds the phase total"):
+        Benchmark(**data)
+
+
+def test_reject_size_breakdown_sum_exceeds_total():
+    # storage_gb is 256.0; components sum to 300.0.
+    data = {
+        **VALID_DATA,
+        "obfuscation_size_breakdown": [
+            {"component": "X", "size_gb": 300.0},
+        ],
+    }
+    with pytest.raises(ValidationError, match="exceeds the phase total"):
+        Benchmark(**data)
+
+
+def test_breakdown_sum_equal_to_total_ok():
+    data = {
+        **VALID_DATA,
+        "obfuscation_time_breakdown": [
+            {"step": "A", "time_hours": 0.7},
+            {"step": "B", "time_hours": 0.3},
+        ],
+    }
+    bm = Benchmark(**data)
+    assert sum(i.time_hours for i in bm.obfuscation_time_breakdown) == 1.0
+
+
+def test_reject_negative_breakdown_value():
+    data = {
+        **VALID_DATA,
+        "obfuscation_time_breakdown": [{"step": "A", "time_hours": -1.0}],
+    }
+    with pytest.raises(ValidationError, match="non-negative"):
+        Benchmark(**data)
+
+
+def test_reject_empty_breakdown_label():
+    data = {
+        **VALID_DATA,
+        "obfuscation_time_breakdown": [{"step": "  ", "time_hours": 1.0}],
+    }
+    with pytest.raises(ValidationError, match="non-empty"):
+        Benchmark(**data)
+
+
+def test_reject_unknown_breakdown_item_field():
+    data = {
+        **VALID_DATA,
+        "obfuscation_time_breakdown": [
+            {"step": "A", "time_hours": 0.5, "bogus": 1}
+        ],
+    }
+    with pytest.raises(ValidationError, match="extra"):
+        Benchmark(**data)
+
+
+def test_loader_translates_target_specific_breakdown_keys(tmp_path):
+    """WE breakdown keys translate to canonical breakdown fields."""
+    from sitegen.load import load_benchmarks
+
+    import yaml
+
+    data = _we_data()
+    data["encryption_time_breakdown"] = [{"step": "Sampling", "time_hours": 0.5}]
+    (tmp_path / "we.yaml").write_text(yaml.dump(data))
+    benchmarks = load_benchmarks(
+        tmp_path,
+        allowed_targets=["witness-encryption-64"],
+        default_target="witness-encryption-64",
+        target_labels={"witness-encryption-64": WE_LABELS},
+    )
+    bm = benchmarks[0]
+    assert bm.obfuscation_time_breakdown[0].step == "Sampling"
+
+
+def test_loader_rejects_wrong_target_breakdown_key(tmp_path):
+    """Using the canonical obfuscation breakdown key is rejected for WE."""
+    from sitegen.load import load_benchmarks
+
+    import yaml
+
+    data = _we_data()
+    data["obfuscation_time_breakdown"] = [{"step": "Sampling", "time_hours": 0.5}]
+    (tmp_path / "bad.yaml").write_text(yaml.dump(data))
+    with pytest.raises(SystemExit):
+        load_benchmarks(
+            tmp_path,
+            allowed_targets=["witness-encryption-64"],
+            default_target="witness-encryption-64",
+            target_labels={"witness-encryption-64": WE_LABELS},
+        )
+
+
 def test_loader_rejects_unknown_target(tmp_path):
     from sitegen.load import load_benchmarks
 

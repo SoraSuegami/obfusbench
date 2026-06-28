@@ -16,6 +16,57 @@ from .utils import commit_url, format_number, format_sci
 # Total-time metrics whose cells also show derived cost (price x total time).
 COST_METRIC_KEYS = ("obfuscation_total_time_hours", "evaluation_total_time_hours")
 
+# Categorical palette for breakdown segments, cycled in order; the synthetic
+# "Other" remainder slice always uses the neutral grey.
+BREAKDOWN_PALETTE = (
+    "#2563eb",  # blue (matches accent)
+    "#7c3aed",  # violet
+    "#0891b2",  # cyan
+    "#16a34a",  # green
+    "#d97706",  # amber
+    "#db2777",  # pink
+    "#4f46e5",  # indigo
+    "#65a30d",  # lime
+)
+BREAKDOWN_OTHER_COLOR = "#cbd5e1"
+
+
+def breakdown_rows(items, label_attr: str, value_attr: str, total: float):
+    """Build display rows for a part-to-whole breakdown of ``total``.
+
+    Returns a list of ``{label, value, pct, color}`` dicts, or ``None`` when
+    there is no breakdown data. Percentages are relative to ``total``; any
+    remainder (total - sum of sub-steps) is appended as an "Other" slice so the
+    segments always add up to the phase total.
+    """
+    if not items:
+        return None
+    rows = []
+    accounted = 0.0
+    for i, item in enumerate(items):
+        value = getattr(item, value_attr)
+        accounted += value
+        rows.append(
+            {
+                "label": getattr(item, label_attr),
+                "value": value,
+                "pct": (value / total * 100.0) if total > 0 else 0.0,
+                "color": BREAKDOWN_PALETTE[i % len(BREAKDOWN_PALETTE)],
+            }
+        )
+    remainder = total - accounted
+    # Only surface "Other" when it is a meaningful slice (guards float noise).
+    if total > 0 and remainder > total * 1e-9:
+        rows.append(
+            {
+                "label": "Other",
+                "value": remainder,
+                "pct": remainder / total * 100.0,
+                "color": BREAKDOWN_OTHER_COLOR,
+            }
+        )
+    return rows
+
 
 def chart_tabs_for(labels: dict[str, str]) -> list[str]:
     """Chart selector tab labels, in the order charts.js renders them."""
@@ -248,6 +299,18 @@ def build_site(
             evaluation_cost_usd=costs["evaluation_total_time_hours"],
             device_label=device_display(registry, bm.device),
             device_hourly_price_usd=price_for_device(prices, bm.device),
+            obfuscation_time_rows=breakdown_rows(
+                bm.obfuscation_time_breakdown, "step", "time_hours",
+                bm.obfuscation_total_time_hours,
+            ),
+            evaluation_time_rows=breakdown_rows(
+                bm.evaluation_time_breakdown, "step", "time_hours",
+                bm.evaluation_total_time_hours,
+            ),
+            obfuscation_size_rows=breakdown_rows(
+                bm.obfuscation_size_breakdown, "component", "size_gb",
+                bm.storage_gb,
+            ),
         )
         (page_dir / "index.html").write_text(detail_html)
 

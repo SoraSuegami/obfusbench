@@ -1,4 +1,52 @@
 {
+  "$defs": {
+    "SizeBreakdownItem": {
+      "additionalProperties": false,
+      "description": "One component of the output size, with the storage it accounts for.",
+      "properties": {
+        "component": {
+          "title": "Component",
+          "type": "string",
+          "minLength": 1,
+          "pattern": ".*\\S.*"
+        },
+        "size_gb": {
+          "title": "Size Gb",
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "component",
+        "size_gb"
+      ],
+      "title": "SizeBreakdownItem",
+      "type": "object"
+    },
+    "TimeBreakdownItem": {
+      "additionalProperties": false,
+      "description": "One sub-step of a phase, with the wall-clock time it accounts for.\n\nThe sub-steps of a phase need not sum to the phase total; the site fills the\nremainder into a synthetic \"Other\" slice at build time.",
+      "properties": {
+        "step": {
+          "title": "Step",
+          "type": "string",
+          "minLength": 1,
+          "pattern": ".*\\S.*"
+        },
+        "time_hours": {
+          "title": "Time Hours",
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "step",
+        "time_hours"
+      ],
+      "title": "TimeBreakdownItem",
+      "type": "object"
+    }
+  },
   "additionalProperties": false,
   "description": "A single iO implementation benchmark entry.",
   "properties": {
@@ -157,6 +205,51 @@
       ],
       "default": null,
       "title": "Evaluation Peak Memory Gb"
+    },
+    "obfuscation_time_breakdown": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/TimeBreakdownItem"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Obfuscation Time Breakdown"
+    },
+    "evaluation_time_breakdown": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/TimeBreakdownItem"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Evaluation Time Breakdown"
+    },
+    "obfuscation_size_breakdown": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/SizeBreakdownItem"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Obfuscation Size Breakdown"
     }
   },
   "required": [
