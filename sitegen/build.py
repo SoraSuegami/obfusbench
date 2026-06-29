@@ -300,7 +300,7 @@ def build_site(
             labels=target_labels[bm.target],
             base_url="../../",
             site=config,
-            commit_link=commit_url(bm.url, bm.commit),
+            commit_link=commit_url(bm.implementation_url, bm.commit),
             obfuscation_cost_usd=costs["obfuscation_total_time_hours"],
             evaluation_cost_usd=costs["evaluation_total_time_hours"],
             device_label=device_display(registry, bm.device),

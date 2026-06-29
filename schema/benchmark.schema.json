@@ -94,7 +94,7 @@
       ],
       "title": "Developers"
     },
-    "url": {
+    "paper_url": {
       "anyOf": [
         {
           "type": "string",
@@ -106,7 +106,21 @@
         }
       ],
       "default": null,
-      "title": "Url"
+      "title": "Paper Url"
+    },
+    "implementation_url": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https?://[^\\s/]+(?:/[^\\s]*)?$"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Implementation Url"
     },
     "commit": {
       "anyOf": [

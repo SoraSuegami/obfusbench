@@ -5,7 +5,11 @@ authors:
 developers:
   - Carol Developer
   - Dave Developer
-url: "https://github.com/example/io-impl"
+# Link to the paper / writeup describing the construction (optional).
+paper_url: "https://eprint.iacr.org/2024/000"
+# Link to the implementation source code (optional). When this is a GitHub repo
+# and `commit` is set, the detail page links the commit.
+implementation_url: "https://github.com/example/io-impl"
 commit: "abc1234"
 date: "2026-01-15"
 # Target id from config/site.yaml (e.g. "obfuscated-prf-110" or

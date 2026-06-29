@@ -87,7 +87,8 @@ class Benchmark(BaseModel):
     id: str
     authors: str | list[str]
     developers: str | list[str]
-    url: str | None = Field(default=None)
+    paper_url: str | None = Field(default=None)
+    implementation_url: str | None = Field(default=None)
     commit: str | None = None
     date: datetime.date
     target: str | None = Field(
@@ -198,15 +199,15 @@ class Benchmark(BaseModel):
             raise ValueError(f"{info.field_name} must contain at least one name")
         return names
 
-    @field_validator("url", mode="before")
+    @field_validator("paper_url", "implementation_url", mode="before")
     @classmethod
-    def validate_url(cls, v: str | None) -> str | None:
+    def validate_url(cls, v: str | None, info) -> str | None:
         if v is None:
             return None
         if not isinstance(v, str):
-            raise ValueError("url must be a string")
+            raise ValueError(f"{info.field_name} must be a string")
         if not v.startswith(("http://", "https://")):
-            raise ValueError("url must be an http or https URL")
+            raise ValueError(f"{info.field_name} must be an http or https URL")
         # Let pydantic's HttpUrl do the heavy lifting
         HttpUrl(v)
         return v
@@ -419,10 +420,11 @@ def generate_json_schema() -> dict:
                 branch["minItems"] = 1
                 branch.setdefault("items", {}).update({"minLength": 1, "pattern": r".*\S.*"})
 
-    url_prop = properties.get("url", {})
-    for branch in url_prop.get("anyOf", []):
-        if branch.get("type") == "string":
-            branch.update({"format": "uri", "pattern": r"^https?://[^\s/]+(?:/[^\s]*)?$"})
+    for key in ("paper_url", "implementation_url"):
+        prop = properties.get(key, {})
+        for branch in prop.get("anyOf", []):
+            if branch.get("type") == "string":
+                branch.update({"format": "uri", "pattern": r"^https?://[^\s/]+(?:/[^\s]*)?$"})
 
     for key in ("target", "device"):
         prop = properties.get(key, {})

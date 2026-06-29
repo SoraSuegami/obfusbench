@@ -29,8 +29,9 @@ Thank you for contributing a benchmark entry! This guide explains how to submit 
 | `id` | string | **yes** | Display name for your implementation (must be unique) |
 | `authors` | string or list of strings | **yes** | Author name(s) of the underlying construction or paper |
 | `developers` | string or list of strings | **yes** | Developer name(s) for the implementation |
-| `url` | string (http/https URL) | no | Link to source code or paper |
-| `commit` | string | no | Commit hash or version identifier |
+| `paper_url` | string (http/https URL) | no | Link to the paper / writeup of the construction |
+| `implementation_url` | string (http/https URL) | no | Link to the implementation source code |
+| `commit` | string | no | Commit hash or version identifier (links the commit when `implementation_url` is a GitHub repo) |
 | `date` | string (`YYYY-MM-DD`) | **yes** | Date the benchmark was measured; used as the x-axis on trend charts |
 | `target` | string | no | Benchmark target id from `config/site.yaml` (e.g. `obfuscated-prf-110`, `witness-encryption-64`); defaults to the first configured target |
 | `device` | string | no | Short GPU id the benchmark ran on (see `config/gpu_devices.yaml`, e.g. `H100`, `H200`, `A100`); used to derive cost. Cost is shown only when set |

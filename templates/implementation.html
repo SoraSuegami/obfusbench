@@ -64,9 +64,13 @@
             <dt>Device</dt>
             <dd>{{ device_label }}{% if device_hourly_price_usd is not none %} (${{ device_hourly_price_usd | format_sci_p }}/h){% endif %}</dd>
             {% endif %}
-            {% if benchmark.url %}
-            <dt>URL</dt>
-            <dd><a href="{{ benchmark.url }}" rel="noopener noreferrer">{{ benchmark.url }}</a></dd>
+            {% if benchmark.paper_url %}
+            <dt>Paper</dt>
+            <dd><a href="{{ benchmark.paper_url }}" rel="noopener noreferrer">{{ benchmark.paper_url }}</a></dd>
+            {% endif %}
+            {% if benchmark.implementation_url %}
+            <dt>Implementation</dt>
+            <dd><a href="{{ benchmark.implementation_url }}" rel="noopener noreferrer">{{ benchmark.implementation_url }}</a></dd>
             {% endif %}
             {% if benchmark.commit %}
             <dt>Commit</dt>

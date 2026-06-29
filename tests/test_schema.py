@@ -28,8 +28,9 @@ def test_schema_accepts_valid_data():
         {"authors": []},
         {"authors": ["Alice", ""]},
         {"developers": []},
-        {"url": "ftp://example.com/repo"},
-        {"url": "http://"},
+        {"implementation_url": "ftp://example.com/repo"},
+        {"implementation_url": "http://"},
+        {"paper_url": "ftp://example.com/paper"},
         {"obfuscation_latency_sec": -1},
         {"obfuscation_peak_memory_gb": -1},
     ],
@@ -42,7 +43,8 @@ def test_schema_rejects_runtime_invalid_data(patch):
 def test_schema_accepts_explicit_null_url_and_memory():
     data = {
         **VALID_DATA,
-        "url": None,
+        "paper_url": None,
+        "implementation_url": None,
         "obfuscation_peak_memory_gb": None,
         "evaluation_peak_memory_gb": None,
     }

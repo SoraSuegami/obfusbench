@@ -10,7 +10,7 @@ VALID_DATA = {
     "id": "Test Implementation",
     "authors": ["Alice", "Bob"],
     "developers": ["Carol", "Dave"],
-    "url": "https://github.com/example/repo",
+    "implementation_url": "https://github.com/example/repo",
     "commit": "abc1234",
     "date": "2026-01-15",
     "device": "H100",
@@ -96,24 +96,42 @@ def test_reject_empty_id():
 
 
 def test_reject_invalid_url():
-    data = {**VALID_DATA, "url": "ftp://not-http.example.com"}
+    data = {**VALID_DATA, "implementation_url": "ftp://not-http.example.com"}
     with pytest.raises(ValidationError, match="http"):
         Benchmark(**data)
 
 
-def test_optional_url_and_commit():
+def test_reject_invalid_paper_url():
+    data = {**VALID_DATA, "paper_url": "ftp://not-http.example.com"}
+    with pytest.raises(ValidationError, match="paper_url"):
+        Benchmark(**data)
+
+
+def test_optional_urls_and_commit():
     data = {**VALID_DATA}
-    del data["url"]
+    del data["implementation_url"]
     del data["commit"]
     bm = Benchmark(**data)
-    assert bm.url is None
+    assert bm.implementation_url is None
+    assert bm.paper_url is None
     assert bm.commit is None
 
 
-def test_explicit_null_url():
-    data = {**VALID_DATA, "url": None}
+def test_accepts_both_urls():
+    data = {
+        **VALID_DATA,
+        "paper_url": "https://eprint.iacr.org/2024/123",
+        "implementation_url": "https://github.com/example/repo",
+    }
     bm = Benchmark(**data)
-    assert bm.url is None
+    assert bm.paper_url == "https://eprint.iacr.org/2024/123"
+    assert bm.implementation_url == "https://github.com/example/repo"
+
+
+def test_explicit_null_url():
+    data = {**VALID_DATA, "implementation_url": None}
+    bm = Benchmark(**data)
+    assert bm.implementation_url is None
 
 
 def test_trim_people_names():

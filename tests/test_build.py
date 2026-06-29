@@ -15,7 +15,7 @@ VALID_DATA = {
     "id": "Test Implementation",
     "authors": ["Alice", "Bob"],
     "developers": ["Carol", "Dave"],
-    "url": "https://github.com/example/repo",
+    "implementation_url": "https://github.com/example/repo",
     "commit": "abc1234",
     "date": "2026-01-15",
     "device": "H100",
@@ -87,6 +87,50 @@ def test_build_with_one_benchmark(tmp_path):
     # Static assets
     assert (output_dir / "static" / "styles.css").exists()
     assert (output_dir / "static" / "app.js").exists()
+
+
+def test_build_renders_paper_and_implementation_urls(tmp_path):
+    """Detail page shows separate Paper / Implementation links and a commit link."""
+    benchmarks_dir = tmp_path / "benchmarks"
+    benchmarks_dir.mkdir()
+    output_dir = tmp_path / "site"
+
+    data = {
+        **VALID_DATA,
+        "paper_url": "https://eprint.iacr.org/2024/123",
+        "implementation_url": "https://github.com/example/repo",
+        "commit": "abc1234",
+    }
+    (benchmarks_dir / "test.yaml").write_text(yaml.dump(data))
+    benchmarks = load_benchmarks(benchmarks_dir)
+    build_site(benchmarks, output_dir, PROJECT_ROOT)
+
+    detail_html = (
+        output_dir / "implementations" / "test-implementation" / "index.html"
+    ).read_text()
+    assert "<dt>Paper</dt>" in detail_html
+    assert "https://eprint.iacr.org/2024/123" in detail_html
+    assert "<dt>Implementation</dt>" in detail_html
+    assert "https://github.com/example/repo" in detail_html
+    # Commit link is derived from the implementation URL.
+    assert "https://github.com/example/repo/commit/abc1234" in detail_html
+
+
+def test_build_omits_paper_url_when_absent(tmp_path):
+    """No Paper row when paper_url is unset (only implementation_url given)."""
+    benchmarks_dir = tmp_path / "benchmarks"
+    benchmarks_dir.mkdir()
+    output_dir = tmp_path / "site"
+
+    (benchmarks_dir / "test.yaml").write_text(yaml.dump(VALID_DATA))
+    benchmarks = load_benchmarks(benchmarks_dir)
+    build_site(benchmarks, output_dir, PROJECT_ROOT)
+
+    detail_html = (
+        output_dir / "implementations" / "test-implementation" / "index.html"
+    ).read_text()
+    assert "<dt>Paper</dt>" not in detail_html
+    assert "<dt>Implementation</dt>" in detail_html
 
 
 def test_build_omits_nd_cost_and_peak_memory_cards(tmp_path):
