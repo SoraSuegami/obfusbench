@@ -160,7 +160,14 @@ def load_targets(config: dict) -> list[dict]:
         # Labels rename the two phases / size for this target; missing keys fall
         # back to the obfuscation defaults.
         labels = {**DEFAULT_LABELS, **(entry.get("labels") or {})}
-        targets.append({"id": tid, "name": str(entry["name"]).strip(), "labels": labels})
+        targets.append({
+            "id": tid,
+            "name": str(entry["name"]).strip(),
+            "labels": labels,
+            # Hidden targets are still loaded/validated but not shown on the
+            # leaderboard (no tab, charts, or table).
+            "hidden": bool(entry.get("hidden", False)),
+        })
     return targets
 
 
@@ -261,7 +268,8 @@ def build_site(
             "evaluation_cost_usd": costs["evaluation_total_time_hours"],
         }
 
-    # Build index page
+    # Build index page. Hidden targets are still loaded and validated, but are
+    # omitted from the leaderboard (no tab, charts, or table).
     target_ctx = [
         {
             "id": t["id"],
@@ -277,6 +285,7 @@ def build_site(
             },
         }
         for t in targets
+        if not t.get("hidden")
     ]
     index_tpl = env.get_template("index.html")
     index_html = index_tpl.render(

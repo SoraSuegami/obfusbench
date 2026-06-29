@@ -23,6 +23,9 @@ targets:
       size_key: "storage_gb"
   - id: "witness-encryption-64"
     name: "Witness encryption for 64 witness bits"
+    # Temporarily hidden from the leaderboard (no tab/charts/table). The data
+    # files and validation are unaffected; remove this flag to re-enable display.
+    hidden: true
     labels:
       phase1_short: "Enc."
       phase1_full: "Encryption"

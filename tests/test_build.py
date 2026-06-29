@@ -328,8 +328,12 @@ def test_404_uses_configured_pages_base_url(tmp_path):
     assert 'href="/obfusbench/"' in html
 
 
-def test_index_has_target_tabs_and_panels(tmp_path):
-    """Index renders one tab and one panel per configured target."""
+def test_index_omits_hidden_target_tabs_and_panels(tmp_path):
+    """Index renders a tab/panel only for visible targets; hidden ones are gone.
+
+    witness-encryption-64 is marked hidden in config/site.yaml, so only the
+    obfuscated-prf-110 target is surfaced on the leaderboard.
+    """
     benchmarks_dir = tmp_path / "benchmarks"
     benchmarks_dir.mkdir()
     output_dir = tmp_path / "site"
@@ -340,14 +344,13 @@ def test_index_has_target_tabs_and_panels(tmp_path):
 
     index_html = (output_dir / "index.html").read_text()
     assert "Obfuscated PRF for 110 input bits" in index_html
-    assert "Witness encryption for 64 witness bits" in index_html
-    assert index_html.count('<button type="button" class="target-tab') == 2
-    assert index_html.count('class="target-panel"') == 2
-    # The second (non-default) target panel starts hidden.
-    assert 'data-target="witness-encryption-64" role="tabpanel" hidden' in index_html
-    # The entry has no explicit target, so it lands on the default target
-    # and the second panel shows the empty state.
-    assert "No benchmark entries yet" in index_html
+    # The hidden target is not shown anywhere on the leaderboard.
+    assert "Witness encryption for 64 witness bits" not in index_html
+    assert 'data-target="witness-encryption-64"' not in index_html
+    assert index_html.count('<button type="button" class="target-tab') == 1
+    assert index_html.count('class="target-panel"') == 1
+    # The benchmark lands on the default (visible) target and is listed there.
+    assert "Test Implementation" in index_html
 
 
 def test_benchmark_assigned_to_explicit_target(tmp_path):
