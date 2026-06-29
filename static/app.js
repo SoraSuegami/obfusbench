@@ -59,11 +59,11 @@
 
     // Numeric sort keys (must match the numeric column data-sort keys)
     var numericKeys = new Set([
-        "obfuscation_latency_sec",
+        "obfuscation_latency_min",
         "obfuscation_total_time_hours",
         "obfuscation_peak_memory_gb",
         "storage_gb",
-        "evaluation_latency_sec",
+        "evaluation_latency_min",
         "evaluation_total_time_hours",
         "evaluation_peak_memory_gb",
     ]);
@@ -86,7 +86,7 @@
             var evalColIndex = -1;
             ths.forEach(function (th, i) {
                 var key = th.getAttribute("data-sort");
-                if (key === "evaluation_latency_sec") evalColIndex = i;
+                if (key === "evaluation_latency_min") evalColIndex = i;
                 var label = th.textContent.trim().replace(/\s*\(.*\)\s*$/, "");
                 var unitMatch = th.textContent.match(/\(([^)]+)\)/);
                 metricLabels[i] = label;
@@ -120,7 +120,7 @@
             var tbody = spotlight.querySelector(".spotlight-table tbody");
             ths.forEach(function (th, i) {
                 var key = th.getAttribute("data-sort");
-                if (key === "id" || key === "authors" || key === "developers" || key === "evaluation_latency_sec") return;
+                if (key === "id" || key === "authors" || key === "developers" || key === "evaluation_latency_min") return;
                 var cell = bestRow.cells[i];
                 if (!cell || !cell.hasAttribute("data-value")) return;
 

@@ -248,7 +248,8 @@ def test_loader_translates_target_specific_keys(tmp_path):
         target_labels={"witness-encryption-64": WE_LABELS},
     )
     bm = benchmarks[0]
-    assert bm.obfuscation_latency_sec == VALID_DATA["obfuscation_latency_sec"]
+    # Seconds input is converted to the canonical minutes field.
+    assert bm.obfuscation_latency_min == VALID_DATA["obfuscation_latency_sec"] / 60
     assert bm.storage_gb == VALID_DATA["storage_gb"]
     assert bm.evaluation_total_time_hours == VALID_DATA["evaluation_total_time_hours"]
 
@@ -269,6 +270,78 @@ def test_loader_rejects_wrong_target_keys(tmp_path):
             default_target="witness-encryption-64",
             target_labels={"witness-encryption-64": WE_LABELS},
         )
+
+
+def test_latency_seconds_converted_to_minutes():
+    # VALID_DATA supplies seconds; the model stores minutes (÷60).
+    bm = Benchmark(**VALID_DATA)
+    assert bm.obfuscation_latency_min == VALID_DATA["obfuscation_latency_sec"] / 60
+    assert bm.evaluation_latency_min == VALID_DATA["evaluation_latency_sec"] / 60
+    assert not hasattr(bm, "obfuscation_latency_sec")
+
+
+def test_accept_latency_minutes_directly():
+    data = {**VALID_DATA}
+    del data["obfuscation_latency_sec"]
+    del data["evaluation_latency_sec"]
+    data["obfuscation_latency_min"] = 5.0
+    data["evaluation_latency_min"] = 0.25
+    bm = Benchmark(**data)
+    assert bm.obfuscation_latency_min == 5.0
+    assert bm.evaluation_latency_min == 0.25
+
+
+def test_reject_both_latency_units():
+    data = {**VALID_DATA, "obfuscation_latency_min": 2.0}
+    # VALID_DATA already has obfuscation_latency_sec, so both are present.
+    with pytest.raises(ValidationError, match="one unit only"):
+        Benchmark(**data)
+
+
+def test_reject_missing_latency():
+    data = {**VALID_DATA}
+    del data["obfuscation_latency_sec"]
+    with pytest.raises(ValidationError, match="[Rr]equired"):
+        Benchmark(**data)
+
+
+def test_reject_negative_latency_minutes():
+    data = {**VALID_DATA}
+    del data["obfuscation_latency_sec"]
+    data["obfuscation_latency_min"] = -1.0
+    with pytest.raises(ValidationError, match="non-negative"):
+        Benchmark(**data)
+
+
+def test_loader_accepts_latency_minutes_key(tmp_path):
+    from sitegen.load import load_benchmarks
+
+    import yaml
+
+    data = {**VALID_DATA}
+    del data["obfuscation_latency_sec"]
+    data["obfuscation_latency_min"] = 9.0
+    (tmp_path / "a.yaml").write_text(yaml.dump(data))
+    benchmarks = load_benchmarks(tmp_path)
+    assert benchmarks[0].obfuscation_latency_min == 9.0
+
+
+def test_loader_accepts_we_latency_minutes_key(tmp_path):
+    from sitegen.load import load_benchmarks
+
+    import yaml
+
+    data = _we_data()
+    del data["encryption_latency_sec"]
+    data["encryption_latency_min"] = 12.0
+    (tmp_path / "we.yaml").write_text(yaml.dump(data))
+    benchmarks = load_benchmarks(
+        tmp_path,
+        allowed_targets=["witness-encryption-64"],
+        default_target="witness-encryption-64",
+        target_labels={"witness-encryption-64": WE_LABELS},
+    )
+    assert benchmarks[0].obfuscation_latency_min == 12.0
 
 
 def test_accept_breakdowns():

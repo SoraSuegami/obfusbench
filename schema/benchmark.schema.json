@@ -155,8 +155,8 @@
       "description": "Short GPU id the benchmark ran on (see config/gpu_devices.yaml), e.g. 'H100', 'H200', 'A100'. Used to look up the hourly price so cost can be derived as price x total time.",
       "title": "Device"
     },
-    "obfuscation_latency_sec": {
-      "title": "Obfuscation Latency Sec",
+    "obfuscation_latency_min": {
+      "title": "Obfuscation Latency Min",
       "type": "number",
       "minimum": 0
     },
@@ -183,8 +183,8 @@
       "type": "number",
       "minimum": 0
     },
-    "evaluation_latency_sec": {
-      "title": "Evaluation Latency Sec",
+    "evaluation_latency_min": {
+      "title": "Evaluation Latency Min",
       "type": "number",
       "minimum": 0
     },
@@ -250,6 +250,34 @@
       ],
       "default": null,
       "title": "Obfuscation Size Breakdown"
+    },
+    "obfuscation_latency_sec": {
+      "anyOf": [
+        {
+          "type": "number",
+          "minimum": 0
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Obfuscation Latency Sec",
+      "description": "Single-run latency in seconds; converted to obfuscation_latency_min (divided by 60) at load time. Prefer obfuscation_latency_min."
+    },
+    "evaluation_latency_sec": {
+      "anyOf": [
+        {
+          "type": "number",
+          "minimum": 0
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Evaluation Latency Sec",
+      "description": "Single-run latency in seconds; converted to evaluation_latency_min (divided by 60) at load time. Prefer evaluation_latency_min."
     }
   },
   "required": [
@@ -257,10 +285,8 @@
     "authors",
     "developers",
     "date",
-    "obfuscation_latency_sec",
     "obfuscation_total_time_hours",
     "storage_gb",
-    "evaluation_latency_sec",
     "evaluation_total_time_hours"
   ],
   "title": "Benchmark",

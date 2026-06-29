@@ -15,11 +15,14 @@ target: "obfuscated-prf-110"
 # H200, A100). Cost is derived automatically as the device's hourly price x
 # total time, so it is not specified here.
 device: "H100"
-obfuscation_latency_sec: 123.45
+# Latency is in minutes (preferred). You may instead give it in seconds as
+# obfuscation_latency_sec / evaluation_latency_sec; it is converted to minutes
+# (divided by 60) at load time. Provide only one unit per phase.
+obfuscation_latency_min: 2.06
 obfuscation_total_time_hours: 1.5
 obfuscation_peak_memory_gb: 48.0
 storage_gb: 512.0
-evaluation_latency_sec: 0.42
+evaluation_latency_min: 0.007
 evaluation_total_time_hours: 0.02
 evaluation_peak_memory_gb: 2.5
 

@@ -85,7 +85,7 @@
                 yTitle: L.phase2_full + " latency (mins)",
                 xIsDate: true,
                 point: function (b) {
-                    return { x: dateToTs(b.date), y: b.evaluation_latency_sec / 60 };
+                    return { x: dateToTs(b.date), y: b.evaluation_latency_min };
                 },
             },
             {
@@ -93,7 +93,7 @@
                 yTitle: L.phase1_full + " latency (mins)",
                 xIsDate: true,
                 point: function (b) {
-                    return { x: dateToTs(b.date), y: b.obfuscation_latency_sec / 60 };
+                    return { x: dateToTs(b.date), y: b.obfuscation_latency_min };
                 },
             },
         ];

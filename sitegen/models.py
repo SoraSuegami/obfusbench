@@ -106,11 +106,14 @@ class Benchmark(BaseModel):
         ),
     )
 
-    obfuscation_latency_sec: float
+    # Latency is stored in minutes. Contributors may supply it in minutes
+    # (``*_latency_min``, preferred) or in seconds (``*_latency_sec``); seconds
+    # are converted to minutes (divided by 60) by a before-validator.
+    obfuscation_latency_min: float
     obfuscation_total_time_hours: float
     obfuscation_peak_memory_gb: float | None = None
     storage_gb: float
-    evaluation_latency_sec: float
+    evaluation_latency_min: float
     evaluation_total_time_hours: float
     evaluation_peak_memory_gb: float | None = None
 
@@ -124,6 +127,42 @@ class Benchmark(BaseModel):
 
     # Set after validation
     slug: str = ""
+
+    @model_validator(mode="before")
+    @classmethod
+    def convert_latency_seconds_to_minutes(cls, data):
+        """Accept latency in minutes or seconds; store minutes.
+
+        ``*_latency_min`` is the canonical (preferred) unit. When only the
+        seconds alias ``*_latency_sec`` is given, it is divided by 60. Supplying
+        both units for the same phase is rejected.
+        """
+        if not isinstance(data, dict):
+            return data
+        data = dict(data)
+        for sec_key, min_key in (
+            ("obfuscation_latency_sec", "obfuscation_latency_min"),
+            ("evaluation_latency_sec", "evaluation_latency_min"),
+        ):
+            if sec_key not in data:
+                continue
+            if data.get(min_key) is not None:
+                raise ValueError(
+                    f"provide latency in one unit only: set either "
+                    f"'{min_key}' or '{sec_key}', not both"
+                )
+            sec_val = data.pop(sec_key)
+            if sec_val is None:
+                data[min_key] = None
+                continue
+            # PyYAML parses unsigned-exponent floats like "5.94e5" as strings, so
+            # coerce to float before dividing. Genuinely non-numeric input is left
+            # for normal field validation to report.
+            try:
+                data[min_key] = float(sec_val) / 60
+            except (TypeError, ValueError):
+                data[min_key] = sec_val
+        return data
 
     @field_validator("id")
     @classmethod
@@ -196,10 +235,10 @@ class Benchmark(BaseModel):
         return v
 
     @field_validator(
-        "obfuscation_latency_sec",
+        "obfuscation_latency_min",
         "obfuscation_total_time_hours",
         "storage_gb",
-        "evaluation_latency_sec",
+        "evaluation_latency_min",
         "evaluation_total_time_hours",
     )
     @classmethod
@@ -280,13 +319,18 @@ DEFAULT_LABELS: dict[str, str] = {
     "size_key": "storage_gb",
 }
 
-# Canonical (internal) metric field names on the Benchmark model. Includes the
-# optional breakdown lists so the loader rejects another target's breakdown keys.
+# Canonical (internal) metric field names on the Benchmark model. Latency is
+# listed in both units: ``*_latency_min`` is the stored field and
+# ``*_latency_sec`` is the accepted seconds alias (converted at load time);
+# both appear so the loader rejects another target's latency keys in either
+# unit. Includes the optional breakdown lists for the same reason.
 CANONICAL_METRIC_KEYS: tuple[str, ...] = (
+    "obfuscation_latency_min",
     "obfuscation_latency_sec",
     "obfuscation_total_time_hours",
     "obfuscation_peak_memory_gb",
     "storage_gb",
+    "evaluation_latency_min",
     "evaluation_latency_sec",
     "evaluation_total_time_hours",
     "evaluation_peak_memory_gb",
@@ -304,10 +348,12 @@ def yaml_key_map(labels: dict[str, str] | None = None) -> dict[str, str]:
     lbl = {**DEFAULT_LABELS, **(labels or {})}
     p1, p2, size = lbl["phase1_key"], lbl["phase2_key"], lbl["size_key"]
     return {
+        f"{p1}_latency_min": "obfuscation_latency_min",
         f"{p1}_latency_sec": "obfuscation_latency_sec",
         f"{p1}_total_time_hours": "obfuscation_total_time_hours",
         f"{p1}_peak_memory_gb": "obfuscation_peak_memory_gb",
         size: "storage_gb",
+        f"{p2}_latency_min": "evaluation_latency_min",
         f"{p2}_latency_sec": "evaluation_latency_sec",
         f"{p2}_total_time_hours": "evaluation_total_time_hours",
         f"{p2}_peak_memory_gb": "evaluation_peak_memory_gb",
@@ -328,18 +374,18 @@ def metric_fields(labels: dict[str, str] | None = None) -> list[dict[str, str]]:
         {"key": "obfuscation_total_time_hours", "label": f"{lbl['phase1_short']} total time", "unit": "h"},
         {"key": "evaluation_total_time_hours", "label": f"{lbl['phase2_short']} total time", "unit": "h"},
         {"key": "storage_gb", "label": lbl["size"], "unit": "GB"},
-        {"key": "obfuscation_latency_sec", "label": f"{lbl['phase1_short']} latency", "unit": "sec"},
-        {"key": "evaluation_latency_sec", "label": f"{lbl['phase2_short']} latency", "unit": "sec"},
+        {"key": "obfuscation_latency_min", "label": f"{lbl['phase1_short']} latency", "unit": "min"},
+        {"key": "evaluation_latency_min", "label": f"{lbl['phase2_short']} latency", "unit": "min"},
     ]
 
 # All numeric metric fields on the model (independent of table display), used to
 # apply the non-negative (minimum: 0) constraint in the generated JSON Schema.
 NUMERIC_METRIC_KEYS: tuple[str, ...] = (
-    "obfuscation_latency_sec",
+    "obfuscation_latency_min",
     "obfuscation_total_time_hours",
     "obfuscation_peak_memory_gb",
     "storage_gb",
-    "evaluation_latency_sec",
+    "evaluation_latency_min",
     "evaluation_total_time_hours",
     "evaluation_peak_memory_gb",
 )
@@ -395,5 +441,26 @@ def generate_json_schema() -> dict:
                 prop["minimum"] = 0
             elif prop.get("type") == "string":
                 prop.update({"minLength": 1, "pattern": r".*\S.*"})
+
+    # Latency: ``*_latency_min`` is canonical, but ``*_latency_sec`` is also
+    # accepted (converted to minutes at load time). Expose the seconds alias as
+    # an optional property and drop the minutes field from `required`, since
+    # either unit satisfies the requirement (the model enforces exactly one).
+    required = schema.get("required", [])
+    for sec_key, min_key in (
+        ("obfuscation_latency_sec", "obfuscation_latency_min"),
+        ("evaluation_latency_sec", "evaluation_latency_min"),
+    ):
+        properties[sec_key] = {
+            "anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}],
+            "default": None,
+            "title": sec_key.replace("_", " ").title(),
+            "description": (
+                f"Single-run latency in seconds; converted to {min_key} "
+                f"(divided by 60) at load time. Prefer {min_key}."
+            ),
+        }
+        if min_key in required:
+            required.remove(min_key)
 
     return schema

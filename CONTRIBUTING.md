@@ -34,13 +34,18 @@ Thank you for contributing a benchmark entry! This guide explains how to submit 
 | `date` | string (`YYYY-MM-DD`) | **yes** | Date the benchmark was measured; used as the x-axis on trend charts |
 | `target` | string | no | Benchmark target id from `config/site.yaml` (e.g. `obfuscated-prf-110`, `witness-encryption-64`); defaults to the first configured target |
 | `device` | string | no | Short GPU id the benchmark ran on (see `config/gpu_devices.yaml`, e.g. `H100`, `H200`, `A100`); used to derive cost. Cost is shown only when set |
-| `<phase1>_latency_sec` | float >= 0 | **yes** | Phase-1 time in seconds |
+| `<phase1>_latency_min` | float >= 0 | **yes** | Phase-1 single-run latency in **minutes** (preferred). Alternatively give `<phase1>_latency_sec` in seconds; it is converted to minutes (÷60). Provide only one of the two |
 | `<phase1>_total_time_hours` | float >= 0 | **yes** | Total phase-1 wall-clock time in hours |
 | `<phase1>_peak_memory_gb` | float >= 0 | no | Phase-1 peak memory in GB; displayed as ND when omitted |
 | `<size>` | float >= 0 | **yes** | Output size in GB |
-| `<phase2>_latency_sec` | float >= 0 | **yes** | Phase-2 time in seconds |
+| `<phase2>_latency_min` | float >= 0 | **yes** | Phase-2 single-run latency in **minutes** (preferred). Alternatively give `<phase2>_latency_sec` in seconds; it is converted to minutes (÷60). Provide only one of the two |
 | `<phase2>_total_time_hours` | float >= 0 | **yes** | Total phase-2 wall-clock time in hours |
 | `<phase2>_peak_memory_gb` | float >= 0 | no | Phase-2 peak memory in GB; displayed as ND when omitted |
+
+Latency is displayed in minutes throughout the site. Supply `<phase1>_latency_min`
+(preferred); the seconds form `<phase1>_latency_sec` is still accepted and
+converted to minutes at load time. Giving both units for the same phase is an
+error.
 
 #### Metric field names depend on the target
 
@@ -50,13 +55,16 @@ using another target's names is rejected with a hint.
 
 | Generic | `obfuscated-prf-110` (default) | `witness-encryption-64` |
 |---|---|---|
-| `<phase1>_latency_sec` | `obfuscation_latency_sec` | `encryption_latency_sec` |
+| `<phase1>_latency_min` | `obfuscation_latency_min` | `encryption_latency_min` |
 | `<phase1>_total_time_hours` | `obfuscation_total_time_hours` | `encryption_total_time_hours` |
 | `<phase1>_peak_memory_gb` | `obfuscation_peak_memory_gb` | `encryption_peak_memory_gb` |
 | `<size>` | `storage_gb` | `ciphertext_size_gb` |
-| `<phase2>_latency_sec` | `evaluation_latency_sec` | `decryption_latency_sec` |
+| `<phase2>_latency_min` | `evaluation_latency_min` | `decryption_latency_min` |
 | `<phase2>_total_time_hours` | `evaluation_total_time_hours` | `decryption_total_time_hours` |
 | `<phase2>_peak_memory_gb` | `evaluation_peak_memory_gb` | `decryption_peak_memory_gb` |
+
+The seconds alias for latency follows the same renaming: e.g.
+`obfuscation_latency_sec` / `encryption_latency_sec`.
 
 `examples/benchmark.example.yaml` uses the default-target names. For another
 target, rename these keys per the table above.
@@ -128,6 +136,7 @@ tooltips of the total-time trend charts.
 | `Duplicate id` | Choose a unique `id` |
 | `unknown target` | Use one of the target ids defined in `config/site.yaml` |
 | `url must be an http or https URL` | Use a full URL starting with `http://` or `https://` |
+| `provide latency in one unit only` | Give either `<phase>_latency_min` or `<phase>_latency_sec`, not both |
 
 ## PR process
 
