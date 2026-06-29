@@ -10,7 +10,7 @@ obfuscation_latency_min: 2.30e3
 obfuscation_total_time_hours: 3.36e45
 storage_gb: 2.04e46
 evaluation_latency_min: 9.55e3
-evaluation_total_time_hours: 1.03e36
+evaluation_total_time_hours: 1.04e36
 # Optional: where the obfuscation total time goes, by sub-step (ordered by the
 # pipeline). Sub-steps may sum to less than the total; the remainder is shown
 # as an "Other" slice.

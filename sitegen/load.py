@@ -9,6 +9,55 @@ import yaml
 from pydantic import ValidationError
 
 from .models import CANONICAL_METRIC_KEYS, DEFAULT_LABELS, Benchmark, yaml_key_map
+from .utils import significant_digits
+
+# Breakdown canonical field -> the per-item value sub-key whose literal carries
+# the display precision.
+_BREAKDOWN_VALUE_KEYS = {
+    "obfuscation_time_breakdown": "time_hours",
+    "evaluation_time_breakdown": "time_hours",
+    "obfuscation_size_breakdown": "size_gb",
+}
+
+
+def _raw_scalars(node):
+    """Mirror a YAML node tree as plain Python, keeping scalars as raw strings.
+
+    Unlike ``safe_load``, scalar leaves are the original literal text (e.g.
+    ``"6.695e46"``), so the contributor's written precision is preserved.
+    """
+    if isinstance(node, yaml.MappingNode):
+        return {key.value: _raw_scalars(val) for key, val in node.value}
+    if isinstance(node, yaml.SequenceNode):
+        return [_raw_scalars(item) for item in node.value]
+    return node.value  # ScalarNode: the raw literal string
+
+
+def _sigfig_map(raw, key_map: dict[str, str]) -> dict:
+    """Map each canonical field to the significant digits of its source literal.
+
+    Latency is stored under the minutes field regardless of the unit supplied;
+    breakdown fields map to a per-item list of significant-digit counts.
+    """
+    sf: dict = {}
+    if not isinstance(raw, dict):
+        return sf
+    for ykey, canonical in key_map.items():
+        if ykey not in raw:
+            continue
+        rawval = raw[ykey]
+        if canonical in _BREAKDOWN_VALUE_KEYS:
+            sub = _BREAKDOWN_VALUE_KEYS[canonical]
+            if isinstance(rawval, list):
+                sf[canonical] = [
+                    significant_digits(item.get(sub)) if isinstance(item, dict) else None
+                    for item in rawval
+                ]
+        else:
+            # Seconds are converted to minutes; record precision on the min field.
+            store = canonical.replace("_latency_sec", "_latency_min")
+            sf[store] = significant_digits(rawval)
+    return sf
 
 
 def load_benchmarks(
@@ -45,8 +94,12 @@ def load_benchmarks(
 
     for path in yaml_files:
         try:
-            with open(path) as f:
-                data = yaml.safe_load(f)
+            text = path.read_text()
+            data = yaml.safe_load(text)
+            # Parallel node tree, used to read the raw numeric literals so the
+            # site can display each value at the precision it was written with.
+            raw_node = yaml.compose(text, Loader=yaml.SafeLoader)
+            raw = _raw_scalars(raw_node) if raw_node is not None else {}
         except yaml.YAMLError as e:
             errors.append(f"{path}: YAML parse error: {e}")
             continue
@@ -92,6 +145,9 @@ def load_benchmarks(
                 loc = " -> ".join(reverse.get(str(l), str(l)) for l in err["loc"])
                 errors.append(f"{path}: {loc}: {err['msg']}")
             continue
+
+        # Record the source precision of each numeric field for display.
+        bm.display_sigfigs = _sigfig_map(raw, key_map)
 
         if bm.target is None:
             bm.target = default_target

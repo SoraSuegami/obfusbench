@@ -151,6 +151,8 @@ def test_benchmarks_json_no_slug(tmp_path):
 
     bj = json.loads((output_dir / "benchmarks.json").read_text())
     assert "slug" not in bj[0]
+    # display_sigfigs is presentation metadata, not part of the data file.
+    assert "display_sigfigs" not in bj[0]
 
 def test_build_renders_breakdown_with_other_slice(tmp_path):
     """A time breakdown renders the bar + table and an auto 'Other' remainder."""

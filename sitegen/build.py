@@ -11,7 +11,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from .models import DEFAULT_LABELS, Benchmark, metric_fields
 from .pricing import device_display, load_gpu_registry, price_for_device, resolve_prices
-from .utils import commit_url, format_number, format_sci
+from .utils import commit_url, format_number, format_sci, format_sci_p
 
 # Total-time metrics whose cells also show derived cost (price x total time).
 COST_METRIC_KEYS = ("obfuscation_total_time_hours", "evaluation_total_time_hours")
@@ -31,16 +31,19 @@ BREAKDOWN_PALETTE = (
 BREAKDOWN_OTHER_COLOR = "#cbd5e1"
 
 
-def breakdown_rows(items, label_attr: str, value_attr: str, total: float):
+def breakdown_rows(items, label_attr: str, value_attr: str, total: float, sigfigs=None):
     """Build display rows for a part-to-whole breakdown of ``total``.
 
-    Returns a list of ``{label, value, pct, color}`` dicts, or ``None`` when
-    there is no breakdown data. Percentages are relative to ``total``; any
+    Returns a list of ``{label, value, pct, color, sigfigs}`` dicts, or ``None``
+    when there is no breakdown data. Percentages are relative to ``total``; any
     remainder (total - sum of sub-steps) is appended as an "Other" slice so the
-    segments always add up to the phase total.
+    segments always add up to the phase total. ``sigfigs`` is the per-item
+    list of source-literal significant digits (used for display precision); the
+    derived "Other" slice has no literal, so it shows at the 3-digit floor.
     """
     if not items:
         return None
+    sigfigs = sigfigs or []
     rows = []
     accounted = 0.0
     for i, item in enumerate(items):
@@ -52,6 +55,7 @@ def breakdown_rows(items, label_attr: str, value_attr: str, total: float):
                 "value": value,
                 "pct": (value / total * 100.0) if total > 0 else 0.0,
                 "color": BREAKDOWN_PALETTE[i % len(BREAKDOWN_PALETTE)],
+                "sigfigs": sigfigs[i] if i < len(sigfigs) else None,
             }
         )
     remainder = total - accounted
@@ -63,6 +67,7 @@ def breakdown_rows(items, label_attr: str, value_attr: str, total: float):
                 "value": remainder,
                 "pct": remainder / total * 100.0,
                 "color": BREAKDOWN_OTHER_COLOR,
+                "sigfigs": None,
             }
         )
     return rows
@@ -167,6 +172,7 @@ def create_jinja_env(templates_dir: Path) -> Environment:
     )
     env.filters["format_number"] = format_number
     env.filters["format_sci"] = format_sci
+    env.filters["format_sci_p"] = format_sci_p
     env.globals["commit_url"] = commit_url
     return env
 
@@ -302,14 +308,17 @@ def build_site(
             obfuscation_time_rows=breakdown_rows(
                 bm.obfuscation_time_breakdown, "step", "time_hours",
                 bm.obfuscation_total_time_hours,
+                bm.display_sigfigs.get("obfuscation_time_breakdown"),
             ),
             evaluation_time_rows=breakdown_rows(
                 bm.evaluation_time_breakdown, "step", "time_hours",
                 bm.evaluation_total_time_hours,
+                bm.display_sigfigs.get("evaluation_time_breakdown"),
             ),
             obfuscation_size_rows=breakdown_rows(
                 bm.obfuscation_size_breakdown, "component", "size_gb",
                 bm.storage_gb,
+                bm.display_sigfigs.get("obfuscation_size_breakdown"),
             ),
         )
         (page_dir / "index.html").write_text(detail_html)

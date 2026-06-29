@@ -7,12 +7,12 @@
     sub-step's absolute value and exact share. The bar conveys proportion at a
     glance; the table stays readable when sub-steps span many orders of
     magnitude (tiny slivers vanish in the bar but are exact in the table). -#}
-{% macro breakdown(title, rows, total, unit, item_head) %}
+{% macro breakdown(title, rows, total, unit, item_head, total_sigfigs) %}
 {% if rows %}
 <div class="breakdown">
     <div class="breakdown-head">
         <span class="breakdown-title">{{ title }}</span>
-        <span class="breakdown-total">total {{ total | format_sci }} <span class="unit">{{ unit }}</span></span>
+        <span class="breakdown-total">total {{ total | format_sci_p(total_sigfigs) }} <span class="unit">{{ unit }}</span></span>
     </div>
     <div class="breakdown-bar" role="img" aria-label="{{ title }}">
         {% for row in rows %}
@@ -31,7 +31,7 @@
             {% for row in rows %}
             <tr>
                 <td><span class="swatch" style="background: {{ row.color }};"></span>{{ row.label }}</td>
-                <td class="numeric">{{ row.value | format_sci }}</td>
+                <td class="numeric">{{ row.value | format_sci_p(row.sigfigs) }}</td>
                 <td class="numeric">
                     <span class="share-cell">
                         <span class="share-track"><span class="share-fill" style="width: {{ "%.4f" | format(row.pct) }}%; background: {{ row.color }};"></span></span>
@@ -62,7 +62,7 @@
             <dd>{{ benchmark.date.isoformat() }}</dd>
             {% if device_label %}
             <dt>Device</dt>
-            <dd>{{ device_label }}{% if device_hourly_price_usd is not none %} (${{ device_hourly_price_usd | format_sci }}/h){% endif %}</dd>
+            <dd>{{ device_label }}{% if device_hourly_price_usd is not none %} (${{ device_hourly_price_usd | format_sci_p }}/h){% endif %}</dd>
             {% endif %}
             {% if benchmark.url %}
             <dt>URL</dt>
@@ -86,31 +86,31 @@
         <div class="metrics-grid">
             <div class="metric-card">
                 <span class="metric-label">Latency</span>
-                <span class="metric-value">{{ benchmark.obfuscation_latency_min | format_sci }} <span class="unit">min</span></span>
+                <span class="metric-value">{{ benchmark.obfuscation_latency_min | format_sci_p(benchmark.display_sigfigs.get('obfuscation_latency_min')) }} <span class="unit">min</span></span>
             </div>
             <div class="metric-card">
                 <span class="metric-label">Total time</span>
-                <span class="metric-value">{{ benchmark.obfuscation_total_time_hours | format_sci }} <span class="unit">h</span></span>
+                <span class="metric-value">{{ benchmark.obfuscation_total_time_hours | format_sci_p(benchmark.display_sigfigs.get('obfuscation_total_time_hours')) }} <span class="unit">h</span></span>
             </div>
             {% if obfuscation_cost_usd is not none %}
             <div class="metric-card">
                 <span class="metric-label">Cost</span>
-                <span class="metric-value">{{ obfuscation_cost_usd | format_sci }} <span class="unit">USD</span></span>
+                <span class="metric-value">{{ obfuscation_cost_usd | format_sci_p }} <span class="unit">USD</span></span>
             </div>
             {% endif %}
             {% if benchmark.obfuscation_peak_memory_gb is not none %}
             <div class="metric-card">
                 <span class="metric-label">Peak memory</span>
-                <span class="metric-value">{{ benchmark.obfuscation_peak_memory_gb | format_sci }} <span class="unit">GB</span></span>
+                <span class="metric-value">{{ benchmark.obfuscation_peak_memory_gb | format_sci_p(benchmark.display_sigfigs.get('obfuscation_peak_memory_gb')) }} <span class="unit">GB</span></span>
             </div>
             {% endif %}
             <div class="metric-card">
                 <span class="metric-label">{{ labels.size }}</span>
-                <span class="metric-value">{{ benchmark.storage_gb | format_sci }} <span class="unit">GB</span></span>
+                <span class="metric-value">{{ benchmark.storage_gb | format_sci_p(benchmark.display_sigfigs.get('storage_gb')) }} <span class="unit">GB</span></span>
             </div>
         </div>
-        {{ breakdown(labels.phase1_full ~ " time breakdown", obfuscation_time_rows, benchmark.obfuscation_total_time_hours, "h", "Step") }}
-        {{ breakdown(labels.size ~ " breakdown", obfuscation_size_rows, benchmark.storage_gb, "GB", "Component") }}
+        {{ breakdown(labels.phase1_full ~ " time breakdown", obfuscation_time_rows, benchmark.obfuscation_total_time_hours, "h", "Step", benchmark.display_sigfigs.get('obfuscation_total_time_hours')) }}
+        {{ breakdown(labels.size ~ " breakdown", obfuscation_size_rows, benchmark.storage_gb, "GB", "Component", benchmark.display_sigfigs.get('storage_gb')) }}
     </section>
 
     <section class="metrics-section">
@@ -118,26 +118,26 @@
         <div class="metrics-grid">
             <div class="metric-card">
                 <span class="metric-label">Latency</span>
-                <span class="metric-value">{{ benchmark.evaluation_latency_min | format_sci }} <span class="unit">min</span></span>
+                <span class="metric-value">{{ benchmark.evaluation_latency_min | format_sci_p(benchmark.display_sigfigs.get('evaluation_latency_min')) }} <span class="unit">min</span></span>
             </div>
             <div class="metric-card">
                 <span class="metric-label">Total time</span>
-                <span class="metric-value">{{ benchmark.evaluation_total_time_hours | format_sci }} <span class="unit">h</span></span>
+                <span class="metric-value">{{ benchmark.evaluation_total_time_hours | format_sci_p(benchmark.display_sigfigs.get('evaluation_total_time_hours')) }} <span class="unit">h</span></span>
             </div>
             {% if evaluation_cost_usd is not none %}
             <div class="metric-card">
                 <span class="metric-label">Cost</span>
-                <span class="metric-value">{{ evaluation_cost_usd | format_sci }} <span class="unit">USD</span></span>
+                <span class="metric-value">{{ evaluation_cost_usd | format_sci_p }} <span class="unit">USD</span></span>
             </div>
             {% endif %}
             {% if benchmark.evaluation_peak_memory_gb is not none %}
             <div class="metric-card">
                 <span class="metric-label">Peak memory</span>
-                <span class="metric-value">{{ benchmark.evaluation_peak_memory_gb | format_sci }} <span class="unit">GB</span></span>
+                <span class="metric-value">{{ benchmark.evaluation_peak_memory_gb | format_sci_p(benchmark.display_sigfigs.get('evaluation_peak_memory_gb')) }} <span class="unit">GB</span></span>
             </div>
             {% endif %}
         </div>
-        {{ breakdown(labels.phase2_full ~ " time breakdown", evaluation_time_rows, benchmark.evaluation_total_time_hours, "h", "Step") }}
+        {{ breakdown(labels.phase2_full ~ " time breakdown", evaluation_time_rows, benchmark.evaluation_total_time_hours, "h", "Step", benchmark.display_sigfigs.get('evaluation_total_time_hours')) }}
     </section>
 </article>
 {% endblock %}

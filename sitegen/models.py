@@ -127,6 +127,10 @@ class Benchmark(BaseModel):
 
     # Set after validation
     slug: str = ""
+    # Per-field display precision (significant digits) inferred from the source
+    # YAML literals; populated by the loader. Excluded from serialization (it is
+    # presentation metadata, not benchmark data).
+    display_sigfigs: dict[str, object] = Field(default_factory=dict, exclude=True)
 
     @model_validator(mode="before")
     @classmethod
@@ -396,10 +400,11 @@ def generate_json_schema() -> dict:
     schema = Benchmark.model_json_schema()
     properties = schema.get("properties", {})
 
-    # Remove the slug field since it's derived.
-    properties.pop("slug", None)
-    if "required" in schema and "slug" in schema["required"]:
-        schema["required"].remove("slug")
+    # Remove internal fields that are not part of the contributor-facing schema.
+    for internal in ("slug", "display_sigfigs"):
+        properties.pop(internal, None)
+        if "required" in schema and internal in schema["required"]:
+            schema["required"].remove(internal)
 
     # Mirror runtime validation closely enough for schema-first contributors.
     if "id" in properties:

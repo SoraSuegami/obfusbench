@@ -81,7 +81,7 @@
                         <td>{{ bm.developers | join(", ") }}</td>
                         <td>{{ t.device_by_slug[bm.slug] if t.device_by_slug[bm.slug] is not none else "ND" }}</td>
                         {% for m in t.metric_fields %}
-                        <td class="numeric" data-value="{% if bm[m.key] is not none %}{{ bm[m.key] }}{% endif %}">{{ bm[m.key] | format_sci }}{% if m.key in bm_costs and bm.device %}<br><span class="cell-cost">({% if bm_costs[m.key] is not none %}${{ bm_costs[m.key] | format_sci }}{% else %}ND{% endif %})</span>{% endif %}</td>
+                        <td class="numeric" data-value="{% if bm[m.key] is not none %}{{ bm[m.key] }}{% endif %}">{{ bm[m.key] | format_sci_p(bm.display_sigfigs.get(m.key)) }}{% if m.key in bm_costs and bm.device %}<br><span class="cell-cost">({% if bm_costs[m.key] is not none %}${{ bm_costs[m.key] | format_sci_p }}{% else %}ND{% endif %})</span>{% endif %}</td>
                         {% endfor %}
                     </tr>
                     {% endfor %}

@@ -6,9 +6,9 @@ commit: "c497114"
 date: "2026-06-28"
 target: "obfuscated-prf-110"
 device: "H200"
-obfuscation_latency_min: 1.34e4
+obfuscation_latency_min: 1.35e4
 obfuscation_total_time_hours: 1.12e46
-storage_gb: 7.74e46
+storage_gb: 7.745e46
 evaluation_latency_min: 4.73e4
 evaluation_total_time_hours: 7.13e38
 # Optional: where the obfuscation total time goes, by sub-step (ordered by the
@@ -26,9 +26,9 @@ obfuscation_time_breakdown:
 # Optional: what makes up the obfuscation size, by component.
 obfuscation_size_breakdown:
   - component: "FE-to-iO transformation"
-    size_gb: 6.69e46
+    size_gb: 6.696e46
   - component: "Final FE decryption"
-    size_gb: 1.05e46
+    size_gb: 1.048e46
 # Optional: where the evaluation total time goes, by sub-step.
 evaluation_time_breakdown:
   - step: "FE-to-iO transformation"
