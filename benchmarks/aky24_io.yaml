@@ -3,35 +3,39 @@ authors: "Shweta Agrawal, Simran Kumari, and Shota Yamada"
 developers: "Sora Suegami"
 url: "https://github.com/MachinaIO/mxx"
 commit: "c497114"
-date: "2026-06-14"
+date: "2026-06-28"
 target: "obfuscated-prf-110"
 device: "H200"
-obfuscation_latency_sec: 5.94e5
-obfuscation_total_time_hours: 1.23e46
+obfuscation_latency_min: 1.34e4
+obfuscation_total_time_hours: 1.12e46
 storage_gb: 7.74e46
-evaluation_latency_sec: 2.79e6
-evaluation_total_time_hours: 7.05e38
+evaluation_latency_min: 4.73e4
+evaluation_total_time_hours: 7.13e38
 # Optional: where the obfuscation total time goes, by sub-step (ordered by the
 # pipeline). Sub-steps may sum to less than the total; the remainder is shown
 # as an "Other" slice.
 obfuscation_time_breakdown:
-  - step: "Trapdoor sampling"
-    time_hours: 5.17e45
-  - step: "Matrix encoding"
-    time_hours: 3.81e45
-  - step: "Preimage sampling"
-    time_hours: 2.21e45
+  - step: "FE-to-iO transformation"
+    time_hours: 9.64e45
+  - step: "Homomorphic PRF over BGG+ encodings (in the final FE decryption)"
+    time_hours: 1.51e45
+  - step: "Error-smudging mask (in the final FE decryption)"
+    time_hours: 6.08e24
+  - step: "PRG for circuit outputs (in the final FE decryption)"
+    time_hours: 6.67e16
 # Optional: what makes up the obfuscation size, by component.
 obfuscation_size_breakdown:
-  - component: "Encoded matrices"
-    size_gb: 6.10e46
-  - component: "Public parameters"
-    size_gb: 1.64e46
+  - component: "FE-to-iO transformation"
+    size_gb: 6.69e46
+  - component: "Final FE decryption"
+    size_gb: 1.05e46
 # Optional: where the evaluation total time goes, by sub-step.
 evaluation_time_breakdown:
-  - step: "Matrix products"
-    time_hours: 3.10e38
-  - step: "Decoding"
-    time_hours: 2.20e38
-  - step: "Rounding"
-    time_hours: 1.05e38
+  - step: "FE-to-iO transformation"
+    time_hours: 7.12e38
+  - step: "Homomorphic PRF over BGG+ encodings (in the final FE decryption)"
+    time_hours: 5.00e35
+  - step: "Error-smudging mask (in the final FE decryption)"
+    time_hours: 1.49e18
+  - step: "PRG for circuit outputs (in the final FE decryption)"
+    time_hours: 1.64e10

@@ -3,11 +3,39 @@ authors: "Sora Suegami, Enrico Bottazzi, and Gayeong Park"
 developers: "Sora Suegami, Enrico Bottazzi, and Gayeong Park"
 url: "https://github.com/MachinaIO/mxx"
 commit: "c497114"
-date: "2026-06-15"
+date: "2026-06-29"
 target: "obfuscated-prf-110"
 device: "H200"
-obfuscation_latency_sec: 1.26e5
-obfuscation_total_time_hours: 3.93e45
+obfuscation_latency_min: 2.30e3
+obfuscation_total_time_hours: 3.36e45
 storage_gb: 2.04e46
-evaluation_latency_sec: 5.84e5
+evaluation_latency_min: 9.55e3
 evaluation_total_time_hours: 1.03e36
+# Optional: where the obfuscation total time goes, by sub-step (ordered by the
+# pipeline). Sub-steps may sum to less than the total; the remainder is shown
+# as an "Other" slice.
+obfuscation_time_breakdown:
+  - step: "FE-to-iO transformation"
+    time_hours: 5.48e5
+  - step: "Homomorphic PRF over BGG+ encodings (in the final FE decryption)"
+    time_hours: 3.36e45
+  - step: "Error-smudging mask (in the final FE decryption)"
+    time_hours: 1.11e25
+  - step: "PRG for circuit outputs (in the final FE decryption)"
+    time_hours: 1.11e17
+# Optional: what makes up the obfuscation size, by component.
+obfuscation_size_breakdown:
+  - component: "FE-to-iO transformation"
+    size_gb: 4.32e8
+  - component: "Final FE decryption"
+    size_gb: 2.04e46
+# Optional: where the evaluation total time goes, by sub-step.
+evaluation_time_breakdown:
+  - step: "FE-to-iO transformation"
+    time_hours: 1.85e2
+  - step: "Homomorphic PRF over BGG+ encodings (in the final FE decryption)"
+    time_hours: 1.04e36
+  - step: "Error-smudging mask (in the final FE decryption)"
+    time_hours: 2.55e18
+  - step: "PRG for circuit outputs (in the final FE decryption)"
+    time_hours: 2.55e10
